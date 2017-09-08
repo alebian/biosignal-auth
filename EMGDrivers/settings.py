@@ -1,0 +1,2 @@
+PORT = 'com5'
+BAUDRATE = 115200
