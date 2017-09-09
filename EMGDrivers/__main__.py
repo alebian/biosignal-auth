@@ -1,7 +1,9 @@
-import settings
-
 from true_sense import Controller
 
+
 if __name__ == '__main__':
-    ts = Controller(port=settings.PORT, baudrate=settings.BAUDRATE)
-    ts.get_status()
+    ts = Controller()
+    header, payload, checksum = ts.get_status()
+    print(header)
+    print(payload)
+    print(checksum)
