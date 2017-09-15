@@ -1,4 +1,5 @@
 from os import path
+import matplotlib.pyplot as plt
 
 import logger
 from true_sense import Packet
@@ -52,13 +53,50 @@ def interpret_file_bytes(stream):
     return (header, rest)
 
 
+def grouped(iterable, n):
+    return zip(*[iter(iterable)]*n)
+
+
 if __name__ == '__main__':
     for file in FILES:
         stream = Stream.from_file(file)
         header, packets = interpret_file_bytes(stream)
 
+        values = []
+
         for packet in packets:
-            wired_frame = packet[1]
-            print(wired_frame)
-            print(str.format('Data code: {}', wired_frame[0]))
-            break
+            packet_header = packet[0]
+            wired_frame = packet[1] # payload
+
+            data_code = wired_frame[0]
+            sub_data_code = wired_frame[1]
+            timestamp_values = wired_frame[2:8]
+            timestamp = 0
+            timestamp += timestamp_values[0] << (8 * 5)
+            timestamp += timestamp_values[1] << (8 * 4)
+            timestamp += timestamp_values[2] << (8 * 3)
+            timestamp += timestamp_values[3] << (8 * 2)
+            timestamp += timestamp_values[4] << (8 * 1)
+            timestamp += timestamp_values[5]
+
+            paired_device_number = wired_frame[8]
+            miscellaneous_data = wired_frame[9]
+            # 0 010 000 1
+            adc_channel = wired_frame[10:-8]
+
+            for high, low in grouped(adc_channel, 2):
+                number = (high << 6) + (low >> 2)
+                highest_bit = (high >> 7) & 0x1
+                if highest_bit == 1:
+                    number -= (1 << 14) # 2s complement
+                values.append((timestamp, number))
+
+            temp_code = wired_frame[-8]
+            temperature = temp_code * 1.13 - 46.8
+            accelerometer = wired_frame[-7:-1]
+            ed_measurement = wired_frame[-1]
+
+        sorted_values = sorted(values, key=lambda pair: pair[0])
+        adc_timestamps, adc_values = map(list, zip(*sorted_values))
+        plt.plot(adc_values)
+        plt.show()
