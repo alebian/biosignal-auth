@@ -27,42 +27,51 @@ class Controller:
         return self._read_packet()
 
     def _write_packet(self, packet):
-        self._logger.info(str.format('About to write a packet: {}', packet))
+        self._logger.debug(str.format('About to write a packet: {}', packet))
         self.serial.write(packet)
 
-    def _read_packet(self):
-        self._logger.info('About to read a packet...')
-        header = self.serial.read(4)
-        if header[0] != SYNC_BYTE or header[1] != SYNC_BYTE:
-            self._logger.debug('Sync bytes were:')
-            self._logger.debug(header[0])
-            self._logger.debug(header[1])
-            raise SyncError
+    def _read_packet(self, src=None):
+        if src == None:
+            src = self.serial
 
-        payload_length = (header[2] << 8) + header[3]
-        payload = list(self.serial.read(payload_length))
-        if payload_length != len(payload):
-            self._logger.debug('Payloads lengths were:')
-            self._logger.debug(payload_length)
-            self._logger.debug(len(payload))
-            raise SizeDoesNotMatchError('payload')
-
-        checksum = self.serial.read(2)
-        checksum = (checksum[0] << 8) + checksum[1]
-        if sum(payload) != checksum:
-            self._logger.debug('Payload was:')
-            self._logger.debug(payload)
-            self._logger.debug(format('Calculated checksum was: %d', sum(payload)))
-            self._logger.debug(format('Provided checksum was: %d', checksum))
-            raise ChecksumError
-
-        return (list(header), payload, checksum)
+        return Packet.read_from_stream(src, self._logger)
 
 
 class Packet:
     def create_packet(data_code, payload):
         wired = Packet._wired_packet(data_code, payload)
         return Packet._link_packet(wired)
+
+    def read_from_stream(stream, logger):
+        logger.debug('About to read a packet...')
+        header = stream.read(4)
+        if header[0] != SYNC_BYTE or header[1] != SYNC_BYTE:
+            logger.error('There was an error with the packet SYNC bytes')
+            logger.debug('Sync bytes were:')
+            logger.debug(header[0])
+            logger.debug(header[1])
+            raise SyncError
+
+        payload_length = (header[2] << 8) + header[3]
+        payload = list(stream.read(payload_length))
+        if payload_length != len(payload):
+            logger.error('There was an error with the packet payload length')
+            logger.debug('Payloads lengths were:')
+            logger.debug(payload_length)
+            logger.debug(len(payload))
+            raise SizeDoesNotMatchError('payload')
+
+        checksum = stream.read(2)
+        checksum = (checksum[0] << 8) + checksum[1]
+        if sum(payload) != checksum:
+            logger.error('There was an error with the packet checksum')
+            logger.debug('Payload was:')
+            logger.debug(payload)
+            logger.debug(str.format('Calculated checksum was: {}', sum(payload)))
+            logger.debug(str.format('Provided checksum was: {}', checksum))
+            raise ChecksumError
+
+        return (list(header), payload, checksum)
 
     def _link_packet(payload):
         return [SYNC_BYTE, SYNC_BYTE] + Packet._get_length(payload) + payload + Packet._get_checksum(payload)
