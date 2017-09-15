@@ -21,8 +21,18 @@ class Controller:
             except SerialException as e:
                 continue
 
+    def basic_request(self, data_code, sub_data_code):
+        packet = Packet.create_packet(data_code, [sub_data_code])
+        self._write_packet(packet)
+        return self._read_packet()
+
     def get_status(self):
         packet = Packet.create_packet(REQUEST_STATUS_DATA_CODES[0], [REQUEST_STATUS_DATA_CODES[1]])
+        self._write_packet(packet)
+        return self._read_packet()
+
+    def get_measure(self):
+        packet = Packet.create_packet(0x10, [0x10])
         self._write_packet(packet)
         return self._read_packet()
 

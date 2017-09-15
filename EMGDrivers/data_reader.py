@@ -57,6 +57,10 @@ def grouped(iterable, n):
     return zip(*[iter(iterable)]*n)
 
 
+def number_to_2s_complement(number, n):
+    return number if (number >> n - 1) == 0 else number - (1 << n)
+
+
 if __name__ == '__main__':
     for file in FILES:
         stream = Stream.from_file(file)
@@ -85,10 +89,7 @@ if __name__ == '__main__':
             adc_channel = wired_frame[10:-8]
 
             for high, low in grouped(adc_channel, 2):
-                number = (high << 6) + (low >> 2)
-                highest_bit = (high >> 7) & 0x1
-                if highest_bit == 1:
-                    number -= (1 << 14) # 2s complement
+                number = number_to_2s_complement((high << 6) + (low >> 2), 14)
                 values.append((timestamp, number))
 
             temp_code = wired_frame[-8]
