@@ -5,9 +5,6 @@ import settings
 
 SYNC_BYTE = 0x33
 
-# Tuples representing DataCode and SubDataCode
-REQUEST_STATUS_DATA_CODES = (0x10, 0x01)
-
 
 class Controller:
     def __init__(self):
@@ -21,18 +18,50 @@ class Controller:
             except SerialException as e:
                 continue
 
-    def basic_request(self, data_code, sub_data_code):
-        packet = Packet.create_packet(data_code, [sub_data_code])
-        self._write_packet(packet)
-        return self._read_packet()
+    def request_data(self):
+        return self.basic_request(0x10, payload=[0x00], msg='Request wireless truesense data from unicon')
 
     def get_status(self):
-        packet = Packet.create_packet(REQUEST_STATUS_DATA_CODES[0], [REQUEST_STATUS_DATA_CODES[1]])
-        self._write_packet(packet)
-        return self._read_packet()
+        return self.basic_request(0x10, payload=[0x01], msg='Gets the plugged in UC status')
 
     def get_measure(self):
-        packet = Packet.create_packet(0x10, [0x10])
+        return self.basic_request(0x10, payload=[0x10], msg='Request wireless measurement of current channel from slave')
+
+    def get_relax_data(self):
+        return self.basic_request(0x14, payload=[0x00], msg='Get the relax state data')
+
+    def reset_relax_variables(self):
+        return self.basic_request(0x14, payload=[0x02], msg='Reset the variables related to relax state in controller')
+
+    def get_relax_parameters(self):
+        return self.basic_request(0x14, payload=[0x04], msg='Get the parameters used in calculating the Relax state')
+
+    def set_rf_mode(self):
+        return self.basic_request(0x20, payload=[0x04], msg='Sets the plugged in truesense RF Mode')
+
+    def turn_spi_on(self):
+        return self.basic_request(0x20, payload=[0x0B], msg='Turn controller microSD SPI interface on')
+
+    def turn_module_on(self):
+        return self.basic_request(0x20, payload=[0x21], msg='Turn module on through unified controller')  #
+
+    def turn_uc_on(self):
+        return self.basic_request(0x20, payload=[0x23], msg='Set controller to on-state where it will turn on')
+
+    def turn_spi_off(self):
+        return self.basic_request(0x20, payload=[0x24], msg='Turn controller microSD SPI interface off')
+
+    """
+    This method sends a generic packet to the device
+    This packet is defined by the Link protocol and the Wired frame
+
+        @params:
+            * data_code: data code defined int the Wired Frame definition
+            * payload [List]: also defined in the Wired Frame definition, contains sud_data_code
+    """
+    def basic_request(self, data_code, payload=[], msg='About to send a packet to the device'):
+        self._logger.debug(msg)
+        packet = Packet.create_packet(data_code, payload)
         self._write_packet(packet)
         return self._read_packet()
 
@@ -43,7 +72,6 @@ class Controller:
     def _read_packet(self, src=None):
         if src == None:
             src = self.serial
-
         return Packet.read_from_stream(src, self._logger)
 
 

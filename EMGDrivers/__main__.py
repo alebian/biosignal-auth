@@ -97,23 +97,23 @@ if __name__ == '__main__':
     # header, payload, checksum = ts.get_status()
     # print(payload)
 
-    basic(0x10, 0x01, 'Gets the plugged in UC status')
-    basic(0x14, 0x04, 'Get the parameters used in calculating the Relax state')
-    basic(0x14, 0x00, 'Get the relax state data')
-    basic(0x14, 0x02, 'Reset the variables related to relax state in controller')
-    basic(0x20, 0x0B, 'Turn controller microSD SPI interface on')
+    ts.get_status()
+    ts.get_relax_parameters()
+    ts.get_relax_data()
+    ts.reset_relax_variables()
+    ts.turn_spi_on()
     # 5
-    basic(0x20, 0x24, 'Turn controller microSD SPI interface off')
+    ts.turn_spi_off()
     # 5
-    basic(0x20, 0x04, 'Sets the plugged in truesense RF Mode')
+    ts.set_rf_mode()
     # 5
-    basic(0x20, 0x21, 'Turn module on through unified controller')  #
-    basic(0x20, 0x23, 'Set controller to on-state where it will turn on')
+    ts.turn_module_on()
+    ts.turn_uc_on()
 
     plotter = Plotter(5000, -32700, 32700)
 
     while True:
-        header, payload, checksum = basic(0x10, 0x00, 'Request wireless truesense data from unicon')
+        header, payload, checksum = ts.request_data()
         values = analyze_data_payload(payload)
         if values[0] != 64:
             for x in values:
