@@ -159,6 +159,38 @@ class WiredPacket():
         return [self.data_code] + self.payload
 
 
+# This class represents data defined in the Wired Frame Definition as: Interpreted/Fixed Received Wireless TrueSense Data
+class WirelessDataPacket():
+    # Values used for scale
+    VALUE_MAX = 32767 # max number to read
+    VALUE_MIN = -32768 # min number to read
+    VALUE_RANGE = VALUE_MAX - VALUE_MIN
+    PHYSICAL_MAX = 800 # max physical measure [uV]
+    PHYSICAL_MIN = -800 # min physical measure [uV]
+    PHYSICAL_RANGE = PHYSICAL_MAX - PHYSICAL_MIN
+
+    def __init__(self, payload, scale=False):
+        self.payload = payload
+        self.scale = scale
+
+    def max_value(scale):
+        return WirelessDataPacket.PHYSICAL_MAX if scale else WirelessDataPacket.VALUE_MAX
+
+    def min_value(scale):
+        return WirelessDataPacket.PHYSICAL_MIN if scale else WirelessDataPacket.VALUE_MIN
+
+    def _scale(self, number):
+        scaled = number
+        if self.scale:
+            scaled = (((number - self._value_min) * self._physical_range) / self._value_range) + self._physical_min
+        return scaled
+
+    def _grouped(iterable, n):
+        return zip(*[iter(iterable)] * n)
+
+    def _number_to_2s_complement(number, n):
+        return number if (number >> n - 1) == 0 else number - (1 << n)
+
 """
     Exceptions
 """
