@@ -223,7 +223,7 @@ class WirelessDataPacket():
     def min_value(cls, scale):
         return cls.PHYSICAL_MIN if scale else cls.VALUE_MIN
 
-    def battery_state(self):
+    def battery_status(self):
         if self.battery == 1:
             self._logger.info('Battery level above 3.15V')
             return True
@@ -313,6 +313,24 @@ class WirelessDataPacket():
         if self.scale:
             scaled = (((number - WirelessDataPacket.VALUE_MIN) * WirelessDataPacket.PHYSICAL_RANGE) / WirelessDataPacket.VALUE_RANGE) + WirelessDataPacket.PHYSICAL_MIN
         return scaled
+
+
+class FilePacket():
+    def __init__(self, header=None, payload=None):
+        self.header = header or []
+        self.payload = payload or []
+
+    @classmethod
+    def read_from_stream(cls, stream, scale=False):
+        # From OPIFileDefinition_v1.00_20130503.pdf
+        header = stream.read(512)[0:127]
+        payload = []
+
+        while stream.has_next():
+            wrapper = LinkPacket.read_from_stream(stream, get_logger())
+            payload.append(WirelessDataPacket(wrapper.payload, scale))
+
+        return FilePacket(header, payload)
 
 
 class SyncError(Exception):

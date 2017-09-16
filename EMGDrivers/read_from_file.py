@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
-import logger
-from true_sense import Packet
+from true_sense import FilePacket, WirelessDataPacket
 
 
 FILES = [
@@ -10,12 +9,13 @@ FILES = [
 
 
 class Stream():
-    def __init__(self, values):
-        self._values = values
+    def __init__(self, values=None):
+        self._values = values or []
         self._current_idx = 0
         self._size = len(values)
 
-    def from_file(file):
+    @classmethod
+    def from_file(cls, file):
         ans = []
         with open(file, 'rb') as f:
             byte = f.read(1)
@@ -41,62 +41,24 @@ class Stream():
         return str.format('<Stream size={} idx={}>', self._size, self._current_idx)
 
 
-# From OPIFileDefinition_v1.00_20130503.pdf
-def interpret_file_bytes(stream):
-    header = stream.read(512)[0:127]
-    rest = []
-
-    while stream.has_next():
-        rest.append(Packet.read_from_stream(stream, logger.get_logger()))
-
-    return (header, rest)
-
-
-def grouped(iterable, n):
-    return zip(*[iter(iterable)]*n)
-
-
-def number_to_2s_complement(number, n):
-    return number if (number >> n - 1) == 0 else number - (1 << n)
-
-
 if __name__ == '__main__':
     for file in FILES:
         stream = Stream.from_file(file)
-        header, packets = interpret_file_bytes(stream)
+        packet = FilePacket.read_from_stream(stream, scale=True)
 
-        values = []
+        wireless_data_frames = packet.payload
 
-        for packet in packets:
-            packet_header = packet[0]
-            wired_frame = packet[1] # payload
+        adc_values = []
+        temperatures = []
+        accelerometers = []
 
-            data_code = wired_frame[0]
-            sub_data_code = wired_frame[1]
-            timestamp_values = wired_frame[2:8]
-            timestamp = 0
-            timestamp += timestamp_values[0] << (8 * 5)
-            timestamp += timestamp_values[1] << (8 * 4)
-            timestamp += timestamp_values[2] << (8 * 3)
-            timestamp += timestamp_values[3] << (8 * 2)
-            timestamp += timestamp_values[4] << (8 * 1)
-            timestamp += timestamp_values[5]
+        for data_frame in wireless_data_frames:
+            if data_frame.has_data():
+                temperatures.append(data_frame.temperature)
+                accelerometers.append(data_frame.accelerometer)
+                for x in data_frame.adc_values:
+                    adc_values.append(x)
 
-            paired_device_number = wired_frame[8]
-            miscellaneous_data = wired_frame[9]
-            # 0 010 000 1
-            adc_channel = wired_frame[10:-8]
-
-            for high, low in grouped(adc_channel, 2):
-                number = number_to_2s_complement((high << 6) + (low >> 2), 14)
-                values.append((timestamp, number))
-
-            temp_code = wired_frame[-8]
-            temperature = temp_code * 1.13 - 46.8
-            accelerometer = wired_frame[-7:-1]
-            ed_measurement = wired_frame[-1]
-
-        sorted_values = sorted(values, key=lambda pair: pair[0])
-        adc_timestamps, adc_values = map(list, zip(*sorted_values))
+        plt.axis([0, len(adc_values), WirelessDataPacket.PHYSICAL_MIN, WirelessDataPacket.PHYSICAL_MAX])
         plt.plot(adc_values)
         plt.show()
