@@ -1,21 +1,34 @@
+from plotters import DynamicAccelerometerPlotter
+from plotters import DynamicPlotter
 from true_sense import Controller, WirelessDataPacket
-from dynamic_plotter import DynamicPlotter
-
 
 if __name__ == '__main__':
-    ts = Controller()
-
-    ts.set_up()
+    truesense_controller = Controller()
+    truesense_controller.set_up()
 
     scale = True
-    min_val = WirelessDataPacket.min_value(scale)
-    max_val = WirelessDataPacket.max_value(scale)
+    adc_plotter = DynamicPlotter(
+        x_range=2000,
+        min_val=WirelessDataPacket.VALUE_MIN,
+        max_val=WirelessDataPacket.VALUE_MAX
+    )
+    if scale:
+        adc_plotter = DynamicPlotter(
+            x_range=2000,
+            min_val=WirelessDataPacket.PHYSICAL_MIN,
+            max_val=WirelessDataPacket.PHYSICAL_MAX
+        )
 
-    plotter = DynamicPlotter(range=5000, min_val=min_val, max_val=max_val)
+    temperature_plotter = DynamicPlotter(x_range=200, min_val=25, max_val=40, title='Temperature',
+                                         y_label='Celsius degrees', color='b')
+    accelerometer_plotter = DynamicAccelerometerPlotter()
 
     while True:
-        header, payload, checksum = ts.request_data()
-        packet = WirelessDataPacket(payload, scale=scale)
+        data_packet = truesense_controller.request_data()
+        packet = WirelessDataPacket(data_packet.payload, scale=scale)
 
-        for x in packet.adc_values:
-            plotter.plotdata(x)
+        if packet.has_data():
+            for x in packet.adc_values:
+                adc_plotter.plotdata(x)
+            temperature_plotter.plotdata(packet.temperature)
+            accelerometer_plotter.plotdata(packet.accelerometer)

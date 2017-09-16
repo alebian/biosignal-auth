@@ -1,9 +1,8 @@
+import statistics
 from serial import Serial, SerialException
+
 from logger import get_logger
-
 import settings
-
-SYNC_BYTE = 0x33
 
 
 class Controller:
@@ -15,8 +14,10 @@ class Controller:
                 self.serial = Serial(port=port, baudrate=settings.BAUDRATE, timeout=3)
                 self._logger.info(str.format("Using device in port: {}", port))
                 break
-            except SerialException as e:
+            except SerialException:
                 continue
+        if not self.serial:
+            self._logger.error('Device not found in any of the known ports')
 
     def set_up(self):
         self.get_status()
@@ -33,39 +34,47 @@ class Controller:
         self.turn_uc_on()
 
     def request_data(self):
-        return self.basic_request(0x10, payload=[0x00], msg='Request wireless truesense data from unicon')
+        return self.basic_request(0x10, payload=[0x00],
+                                  msg='Request wireless truesense data from unicon')
 
     def get_status(self):
         return self.basic_request(0x10, payload=[0x01], msg='Gets the plugged in UC status')
 
     def get_measure(self):
-        return self.basic_request(0x10, payload=[0x10], msg='Request wireless measurement of current channel from slave')
+        return self.basic_request(0x10, payload=[0x10],
+                                  msg='Request wireless measurement of current channel from slave')
 
     def get_relax_data(self):
         return self.basic_request(0x14, payload=[0x00], msg='Get the relax state data')
 
     def reset_relax_variables(self):
-        return self.basic_request(0x14, payload=[0x02], msg='Reset the variables related to relax state in controller')
+        return self.basic_request(0x14, payload=[0x02],
+                                  msg='Reset the variables related to relax state in controller')
 
     def get_relax_parameters(self):
-        return self.basic_request(0x14, payload=[0x04], msg='Get the parameters used in calculating the Relax state')
+        return self.basic_request(0x14, payload=[0x04],
+                                  msg='Get the parameters used in calculating the Relax state')
 
     def set_rf_mode(self):
         return self.basic_request(0x20, payload=[0x04], msg='Sets the plugged in truesense RF Mode')
 
     def turn_spi_on(self):
-        return self.basic_request(0x20, payload=[0x0B], msg='Turn controller microSD SPI interface on')
+        return self.basic_request(0x20, payload=[0x0B],
+                                  msg='Turn controller microSD SPI interface on')
 
     def turn_module_on(self):
-        return self.basic_request(0x20, payload=[0x21], msg='Turn module on through unified controller')  #
+        return self.basic_request(0x20, payload=[0x21],
+                                  msg='Turn module on through unified controller')  #
 
     def turn_uc_on(self):
-        return self.basic_request(0x20, payload=[0x23], msg='Set controller to on-state where it will turn on')
+        return self.basic_request(0x20, payload=[0x23],
+                                  msg='Set controller to on-state where it will turn on')
 
     def turn_spi_off(self):
-        return self.basic_request(0x20, payload=[0x24], msg='Turn controller microSD SPI interface off')
+        return self.basic_request(0x20, payload=[0x24],
+                                  msg='Turn controller microSD SPI interface off')
 
-    def basic_request(self, data_code, payload=[], msg='About to send a packet to the device'):
+    def basic_request(self, data_code, payload=None, msg='About to send a packet to the device'):
         """
         This method sends a generic packet to the device
         This packet is defined by the Link protocol and the Wired frame
@@ -75,8 +84,11 @@ class Controller:
                 * payload [List]: also defined in the Wired Frame definition, contains sud_data_code
         """
         self._logger.debug(msg)
-        packet = Packet.create_packet(data_code, payload)
-        self._write_packet(packet)
+
+        wired = WiredPacket(data_code, payload or [])
+        packet = LinkPacket(payload=wired.to_list())
+
+        self._write_packet(packet.to_list())
         return self._read_packet()
 
     def _write_packet(self, packet):
@@ -84,14 +96,9 @@ class Controller:
         self.serial.write(packet)
 
     def _read_packet(self, src=None):
-        if src == None:
+        if src is None:
             src = self.serial
-        return Packet.read_from_stream(src, self._logger)
-
-
-"""
-    Packet classes
-"""
+        return LinkPacket.read_from_stream(src, self._logger)
 
 
 def grouped(iterable, n):
@@ -102,15 +109,24 @@ def number_to_2s_complement(number, n):
     return number if (number >> n - 1) == 0 else number - (1 << n)
 
 
-class Packet:
-    def create_packet(data_code, payload):
-        wired = WiredPacket(data_code, payload)
-        return LinkPacket(wired.to_list()).to_list()
+class LinkPacket():
+    SYNC_BYTE = 0x33
 
-    def read_from_stream(stream, logger):
-        logger.debug('About to read a packet...')
+    def __init__(self, header=None, payload=None, payload_length=0, checksum=0):
+        self.header = header or []
+        self.payload = payload or []
+        self.checksum = checksum
+        self.payload_length = payload_length
+
+    def to_list(self):
+        sync = LinkPacket.SYNC_BYTE
+        return [sync, sync] + self._get_length() + self.payload + self._get_checksum()
+
+    @classmethod
+    def read_from_stream(cls, stream, logger):
+        logger.debug('About to read a link packet...')
         header = stream.read(4)
-        if header[0] != SYNC_BYTE or header[1] != SYNC_BYTE:
+        if header[0] != cls.SYNC_BYTE or header[1] != cls.SYNC_BYTE:
             logger.error('There was an error with the packet SYNC bytes')
             logger.debug('Sync bytes were:')
             logger.debug(header[0])
@@ -136,15 +152,8 @@ class Packet:
             logger.debug(str.format('Provided checksum was: {}', checksum))
             raise ChecksumError
 
-        return (list(header), payload, checksum)
-
-
-class LinkPacket():
-    def __init__(self, payload=[]):
-        self.payload = payload
-
-    def to_list(self):
-        return [SYNC_BYTE, SYNC_BYTE] + self._get_length() + self.payload + self._get_checksum()
+        return LinkPacket(header=list(header), payload=payload, payload_length=payload_length,
+                          checksum=checksum)
 
     def _get_length(self):
         high_byte = ((len(self.payload)) >> 8) & 0xff
@@ -159,22 +168,24 @@ class LinkPacket():
 
 
 class WiredPacket():
-    def __init__(self, data_code, payload=[]):
+    def __init__(self, data_code, payload=None):
         self.data_code = data_code
-        self.payload = payload
+        self.payload = payload or []
 
     def to_list(self):
         return [self.data_code] + self.payload
 
 
-# This class represents data defined in the Wired Frame Definition as: Interpreted/Fixed Received Wireless TrueSense Data
+# This class represents data defined in the Wired Frame Definition as:
+#
+# - Interpreted/Fixed Received Wireless TrueSense Data
 class WirelessDataPacket():
     # Values used for scale
-    VALUE_MAX = 32767 # max number to read
-    VALUE_MIN = -32768 # min number to read
+    VALUE_MAX = 32767  # max number to read
+    VALUE_MIN = -32768  # min number to read
     VALUE_RANGE = VALUE_MAX - VALUE_MIN
-    PHYSICAL_MAX = 800 # max physical measure [uV]
-    PHYSICAL_MIN = -800 # min physical measure [uV]
+    PHYSICAL_MAX = 800  # max physical measure [uV]
+    PHYSICAL_MIN = -800  # min physical measure [uV]
     PHYSICAL_RANGE = PHYSICAL_MAX - PHYSICAL_MIN
     # Constants
     HAS_DATA = 0x01
@@ -182,28 +193,43 @@ class WirelessDataPacket():
     VALID_DATA_CODE = 0x01
     SAMPLE_QUALITY_MASK = 0x03
     CORRUPTED_DATA = 3
-
+    ED_MASK = 0x7F
+    ADC_VALUE_LENGTH = 14
+    BYTE_VALUE_LENGTH = 8
 
     def __init__(self, payload, scale=False):
         self.payload = payload
         self.scale = scale
         self._logger = get_logger()
+
         self.adc_values = []
+        self.data_code = 0
+        self.sub_data_code = 0
+        self.timestamp = 0
+        self.paired_device_number = 0
+        self.miscellaneous_data = 0
+        self.battery = 0
+        self.temperature = 0
+        self.accelerometer = (0, 0, 0)
+        self.ed_measurement = 0
+
         self._analyze()
 
-    def max_value(scale):
-        return WirelessDataPacket.PHYSICAL_MAX if scale else WirelessDataPacket.VALUE_MAX
+    @classmethod
+    def max_value(cls, scale):
+        return cls.PHYSICAL_MAX if scale else cls.VALUE_MAX
 
-    def min_value(scale):
-        return WirelessDataPacket.PHYSICAL_MIN if scale else WirelessDataPacket.VALUE_MIN
+    @classmethod
+    def min_value(cls, scale):
+        return cls.PHYSICAL_MIN if scale else cls.VALUE_MIN
 
     def battery_state(self):
         if self.battery == 1:
             self._logger.info('Battery level above 3.15V')
             return True
-        else:
-            self._logger.info('Battery level below 3.15V')
-            return False
+
+        self._logger.info('Battery level below 3.15V')
+        return False
 
     def has_data(self):
         if self.payload[0] == WirelessDataPacket.HAS_DATA:
@@ -253,18 +279,34 @@ class WirelessDataPacket():
             if data_corruption == WirelessDataPacket.CORRUPTED_DATA:
                 self._logger.debug('Corrupted data found')
                 break
-            number = number_to_2s_complement((high << 6) + (low >> 2), 14)
+            number = number_to_2s_complement((high << 6) + (low >> 2),
+                                             WirelessDataPacket.ADC_VALUE_LENGTH)
             number = self._scale(number)
             self.adc_values.append(number)
 
     def _decode_temperature(self):
-        self.temperature = self.payload[-8]
+        temp_code = self.payload[-8]
+        self.temperature = (temp_code * 1.13) - 46.8
 
     def _decode_accelerometer(self):
-        self.accelerometer = self.payload[-7:-1]
+        raw_data = self.payload[-7:-1]
+        accelerometer_x = number_to_2s_complement(raw_data[0],
+                                                  WirelessDataPacket.BYTE_VALUE_LENGTH)
+        accelerometer_y = number_to_2s_complement(raw_data[1],
+                                                  WirelessDataPacket.BYTE_VALUE_LENGTH)
+        # Z values are sampled at a higher rate, thus giving 4 values
+        z = [
+            number_to_2s_complement(raw_data[2], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            number_to_2s_complement(raw_data[3], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            number_to_2s_complement(raw_data[4], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            number_to_2s_complement(raw_data[5], WirelessDataPacket.BYTE_VALUE_LENGTH)
+        ]
+        accelerometer_z = statistics.mean(z)
+
+        self.accelerometer = (accelerometer_x, accelerometer_y, accelerometer_z)
 
     def _decode_ed_measurement(self):
-        self.ed_measurement = self.payload[-1]
+        self.ed_measurement = self.payload[-1] & WirelessDataPacket.ED_MASK
 
     def _scale(self, number):
         scaled = number
@@ -273,33 +315,32 @@ class WirelessDataPacket():
         return scaled
 
 
-"""
-    Exceptions
-"""
-
-
 class SyncError(Exception):
-    def __init__(self, value='SYNC bytes do not match'):
-        self.value = value
+    def __init__(self, message='SYNC bytes do not match'):
+        super(SyncError, self).__init__(message)
+        self.message = message
 
     def __str__(self):
-        return repr(self.value)
+        return repr(self.message)
 
 
 class SizeDoesNotMatchError(Exception):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, message):
+        super(SizeDoesNotMatchError, self).__init__(message)
+        self.message = message
 
     def __str__(self):
-        return format("Size of %s does not match", self.value)
+        return format("Size of %s does not match", self.message)
 
 
 class ChecksumError(Exception):
-    def __init__(self, value='Checksum does not validate data'):
-        self.value = value
+    def __init__(self, message='Checksum does not validate data'):
+        super(ChecksumError, self).__init__(message)
+        self.message = message
 
     def __str__(self):
-        return repr(self.value)
+        return repr(self.message)
+
 
 class DataCodeError(Exception):
     def __init__(self, expected, got):
@@ -307,4 +348,5 @@ class DataCodeError(Exception):
         self.got = got
 
     def __str__(self):
-        return repr(str.format('Invalid data code. Expected {} but received {}', self.expected, self.got))
+        return repr(
+            str.format('Invalid data code. Expected {} but received {}', self.expected, self.got))

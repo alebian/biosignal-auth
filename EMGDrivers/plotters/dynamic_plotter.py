@@ -2,17 +2,21 @@ import matplotlib.pyplot as plt
 
 
 class DynamicPlotter:
-    def __init__(self, range=5000, min_val=-100, max_val=100):
+    def __init__(self, x_range=5000, min_val=-100, max_val=100,
+                 color='r', title='', y_label='', x_label=''):
         plt.ion()
         self.x = []
 
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
 
-        self.line1, = self.ax.plot(self.x, 'r', label='X')
+        plt.title(title)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        self.line1, = self.ax.plot(self.x, color, label='X')
 
-        self.range = range
-        self.ax.axis([0, range, min_val, max_val])
+        self.x_range = x_range
+        self.ax.axis([0, x_range, min_val, max_val])
         self.plcounter = 0
         self.plotx = []
 
@@ -28,7 +32,7 @@ class DynamicPlotter:
         plt.pause(0.0001)
         self.plcounter = self.plcounter + 1
 
-        if self.plcounter > self.range:
+        if self.plcounter > self.x_range:
             self.plcounter = 0
             self.plotx[:] = []
             self.x[:] = []
