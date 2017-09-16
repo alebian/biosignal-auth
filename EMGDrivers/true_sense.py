@@ -65,15 +65,15 @@ class Controller:
     def turn_spi_off(self):
         return self.basic_request(0x20, payload=[0x24], msg='Turn controller microSD SPI interface off')
 
-    """
-    This method sends a generic packet to the device
-    This packet is defined by the Link protocol and the Wired frame
-
-        @params:
-            * data_code: data code defined int the Wired Frame definition
-            * payload [List]: also defined in the Wired Frame definition, contains sud_data_code
-    """
     def basic_request(self, data_code, payload=[], msg='About to send a packet to the device'):
+        """
+        This method sends a generic packet to the device
+        This packet is defined by the Link protocol and the Wired frame
+
+            @params:
+                * data_code: data code defined int the Wired Frame definition
+                * payload [List]: also defined in the Wired Frame definition, contains sud_data_code
+        """
         self._logger.debug(msg)
         packet = Packet.create_packet(data_code, payload)
         self._write_packet(packet)
@@ -92,6 +92,14 @@ class Controller:
 """
     Packet classes
 """
+
+
+def grouped(iterable, n):
+    return zip(*[iter(iterable)] * n)
+
+
+def number_to_2s_complement(number, n):
+    return number if (number >> n - 1) == 0 else number - (1 << n)
 
 
 class Packet:
@@ -168,10 +176,20 @@ class WirelessDataPacket():
     PHYSICAL_MAX = 800 # max physical measure [uV]
     PHYSICAL_MIN = -800 # min physical measure [uV]
     PHYSICAL_RANGE = PHYSICAL_MAX - PHYSICAL_MIN
+    # Constants
+    HAS_DATA = 0x01
+    NO_DATA = 0x40
+    VALID_DATA_CODE = 0x01
+    SAMPLE_QUALITY_MASK = 0x03
+    CORRUPTED_DATA = 3
+
 
     def __init__(self, payload, scale=False):
         self.payload = payload
         self.scale = scale
+        self._logger = get_logger()
+        self.adc_values = []
+        self._analyze()
 
     def max_value(scale):
         return WirelessDataPacket.PHYSICAL_MAX if scale else WirelessDataPacket.VALUE_MAX
@@ -179,17 +197,81 @@ class WirelessDataPacket():
     def min_value(scale):
         return WirelessDataPacket.PHYSICAL_MIN if scale else WirelessDataPacket.VALUE_MIN
 
+    def battery_state(self):
+        if self.battery == 1:
+            self._logger.info('Battery level above 3.15V')
+            return True
+        else:
+            self._logger.info('Battery level below 3.15V')
+            return False
+
+    def has_data(self):
+        if self.payload[0] == WirelessDataPacket.HAS_DATA:
+            return True
+        elif self.payload[0] == WirelessDataPacket.NO_DATA:
+            self._logger.debug('No data found in packet')
+        else:
+            self._logger.error('Error in data')
+
+        return False
+
+    def _analyze(self):
+        if self.has_data():
+            self._decode_data_codes()
+            self._decode_timestamp()
+            self._decode_paired_device_number()
+            self._decode_miscellaneous_data()
+            self._decode_adc_values()
+            self._decode_temperature()
+            self._decode_accelerometer()
+            self._decode_ed_measurement()
+
+    def _decode_data_codes(self):
+        self.data_code = self.payload[0]
+        if self.data_code != WirelessDataPacket.VALID_DATA_CODE:
+            raise DataCodeError(WirelessDataPacket.VALID_DATA_CODE, self.data_code)
+
+        self.sub_data_code = self.payload[1]
+        if self.sub_data_code != WirelessDataPacket.VALID_DATA_CODE:
+            raise DataCodeError(WirelessDataPacket.VALID_DATA_CODE, self.sub_data_code)
+
+    def _decode_timestamp(self):
+        self.timestamp = self.payload[2:8]
+
+    def _decode_paired_device_number(self):
+        self.paired_device_number = self.payload[8]
+
+    def _decode_miscellaneous_data(self):
+        # 0 010 000 1
+        self.miscellaneous_data = self.payload[9]
+        self.battery = self.miscellaneous_data & 0x01
+
+    def _decode_adc_values(self):
+        adc_channel = self.payload[10:-8]
+        for high, low in grouped(adc_channel, 2):
+            data_corruption = low & WirelessDataPacket.SAMPLE_QUALITY_MASK
+            if data_corruption == WirelessDataPacket.CORRUPTED_DATA:
+                self._logger.debug('Corrupted data found')
+                break
+            number = number_to_2s_complement((high << 6) + (low >> 2), 14)
+            number = self._scale(number)
+            self.adc_values.append(number)
+
+    def _decode_temperature(self):
+        self.temperature = self.payload[-8]
+
+    def _decode_accelerometer(self):
+        self.accelerometer = self.payload[-7:-1]
+
+    def _decode_ed_measurement(self):
+        self.ed_measurement = self.payload[-1]
+
     def _scale(self, number):
         scaled = number
         if self.scale:
-            scaled = (((number - self._value_min) * self._physical_range) / self._value_range) + self._physical_min
+            scaled = (((number - WirelessDataPacket.VALUE_MIN) * WirelessDataPacket.PHYSICAL_RANGE) / WirelessDataPacket.VALUE_RANGE) + WirelessDataPacket.PHYSICAL_MIN
         return scaled
 
-    def _grouped(iterable, n):
-        return zip(*[iter(iterable)] * n)
-
-    def _number_to_2s_complement(number, n):
-        return number if (number >> n - 1) == 0 else number - (1 << n)
 
 """
     Exceptions
@@ -218,3 +300,11 @@ class ChecksumError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+class DataCodeError(Exception):
+    def __init__(self, expected, got):
+        self.expected = expected
+        self.got = got
+
+    def __str__(self):
+        return repr(str.format('Invalid data code. Expected {} but received {}', self.expected, self.got))
