@@ -1,27 +1,5 @@
-import time
-import matplotlib.pyplot as plt
-import numpy as np
-
 from true_sense import Controller
-import logger
-from true_sense import Packet
-
-
-def interpret_file_bytes(stream):
-    rest = []
-
-    while stream.has_next():
-        rest.append(Packet.read_from_stream(stream, logger.get_logger()))
-
-    return rest
-
-
-def basic(code, sub_code, msg):
-    # print(msg)
-    header, payload, checksum = ts.basic_request(code, sub_code)
-    # print(header)
-    # print(payload)
-    return (header, payload, checksum)
+from dynamic_plotter import DynamicPlotter
 
 
 def grouped(iterable, n):
@@ -58,44 +36,8 @@ def analyze_data_payload(wired_frame):
     return values
 
 
-class Plotter:
-    def __init__(self, rangeval, minval, maxval):
-        # You probably won't need this if you're embedding things in a tkinter plot...
-        plt.ion()
-        self.x = []
-
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
-
-        self.line1, = self.ax.plot(self.x, 'r', label='X')
-
-        self.rangeval = rangeval
-        self.ax.axis([0, rangeval, minval, maxval])
-        self.plcounter = 0
-        self.plotx = []
-
-    def close(self):
-        plt.close()
-
-    def plotdata(self, new_values):
-        self.x.append(new_values)
-        self.plotx.append(self.plcounter)
-        self.line1.set_ydata(self.x)
-        self.line1.set_xdata(self.plotx)
-        self.fig.canvas.draw()
-        plt.pause(0.0001)
-        self.plcounter = self.plcounter + 1
-
-        if self.plcounter > self.rangeval:
-            self.plcounter = 0
-            self.plotx[:] = []
-            self.x[:] = []
-
-
 if __name__ == '__main__':
     ts = Controller()
-    # header, payload, checksum = ts.get_status()
-    # print(payload)
 
     ts.get_status()
     ts.get_relax_parameters()
@@ -110,11 +52,12 @@ if __name__ == '__main__':
     ts.turn_module_on()
     ts.turn_uc_on()
 
-    plotter = Plotter(5000, -32700, 32700)
+    plotter = DynamicPlotter(range=5000, min_val=-32700, max_val=32700)
 
     while True:
         header, payload, checksum = ts.request_data()
         values = analyze_data_payload(payload)
+        print(values)
         if values[0] != 64:
             for x in values:
                 plotter.plotdata(x)

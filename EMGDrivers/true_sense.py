@@ -144,6 +144,7 @@ class SizeDoesNotMatchError(Exception):
     def __str__(self):
         return format("Size of %s does not match", self.value)
 
+
 class ChecksumError(Exception):
     def __init__(self, value='Checksum does not validate data'):
         self.value = value
