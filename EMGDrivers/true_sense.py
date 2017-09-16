@@ -25,11 +25,11 @@ class Controller:
         self.get_relax_data()
         self.reset_relax_variables()
         self.turn_spi_on()
-        # 5
+        self.request_5_packets(0)
         self.turn_spi_off()
-        # 5
+        self.request_5_packets(0)
         self.set_rf_mode()
-        # 5
+        self.request_5_packets(0)
         self.turn_module_on()
         self.turn_uc_on()
 
@@ -73,6 +73,11 @@ class Controller:
     def turn_spi_off(self):
         return self.basic_request(0x20, payload=[0x24],
                                   msg='Turn controller microSD SPI interface off')
+
+    def request_5_packets(self, from_idx=0):
+        return self.basic_request(0x2A,
+                                  payload=[0x00, (from_idx >> 16) & 0xFF, (from_idx >> 8) & 0xFF, from_idx & 0xFF],
+                                  msg='Request for 5 packets of interpreted data from memory module')
 
     def basic_request(self, data_code, payload=None, msg='About to send a packet to the device'):
         """

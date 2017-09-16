@@ -7,16 +7,17 @@ if __name__ == '__main__':
     truesense_controller.set_up()
 
     scale = True
-    adc_plotter = DynamicPlotter(
-        x_range=2000,
-        min_val=WirelessDataPacket.VALUE_MIN,
-        max_val=WirelessDataPacket.VALUE_MAX
-    )
     if scale:
         adc_plotter = DynamicPlotter(
             x_range=2000,
             min_val=WirelessDataPacket.PHYSICAL_MIN,
             max_val=WirelessDataPacket.PHYSICAL_MAX
+        )
+    else:
+        adc_plotter = DynamicPlotter(
+            x_range=2000,
+            min_val=WirelessDataPacket.VALUE_MIN,
+            max_val=WirelessDataPacket.VALUE_MAX
         )
 
     temperature_plotter = DynamicPlotter(x_range=200, min_val=25, max_val=40, title='Temperature',
