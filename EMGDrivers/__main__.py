@@ -9,8 +9,14 @@ def grouped(iterable, n):
 def number_to_2s_complement(number, n):
     return number if (number >> n - 1) == 0 else number - (1 << n)
 
+VALUE_MAX = 32767
+VALUE_MIN = -32768
+VALUE_RANGE = VALUE_MAX - VALUE_MIN
+PHYSICAL_MAX = 800
+PHYSICAL_MIN = -800
+PHYSICAL_RANGE = PHYSICAL_MAX - PHYSICAL_MIN
 
-def analyze_data_payload(wired_frame):
+def analyze_data_payload(wired_frame, scale=False):
     if wired_frame[0] == 64:
         return wired_frame
 
@@ -27,6 +33,8 @@ def analyze_data_payload(wired_frame):
 
     for high, low in grouped(adc_channel, 2):
         number = number_to_2s_complement((high << 6) + (low >> 2), 14)
+        if scale:
+            number = (((number - VALUE_MIN) * PHYSICAL_RANGE) / VALUE_RANGE) + PHYSICAL_MIN
         values.append(number)
 
     temp_code = wired_frame[-8]
@@ -39,25 +47,17 @@ def analyze_data_payload(wired_frame):
 if __name__ == '__main__':
     ts = Controller()
 
-    ts.get_status()
-    ts.get_relax_parameters()
-    ts.get_relax_data()
-    ts.reset_relax_variables()
-    ts.turn_spi_on()
-    # 5
-    ts.turn_spi_off()
-    # 5
-    ts.set_rf_mode()
-    # 5
-    ts.turn_module_on()
-    ts.turn_uc_on()
+    ts.set_up()
 
-    plotter = DynamicPlotter(range=5000, min_val=-32700, max_val=32700)
+    scale = True
+    min_val = PHYSICAL_MIN if scale else VALUE_MIN
+    max_val = PHYSICAL_MAX if scale else VALUE_MAX
+
+    plotter = DynamicPlotter(range=5000, min_val=min_val, max_val=max_val)
 
     while True:
         header, payload, checksum = ts.request_data()
-        values = analyze_data_payload(payload)
-        print(values)
+        values = analyze_data_payload(payload, scale=scale)
         if values[0] != 64:
             for x in values:
                 plotter.plotdata(x)

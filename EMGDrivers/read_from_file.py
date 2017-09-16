@@ -1,4 +1,3 @@
-from os import path
 import matplotlib.pyplot as plt
 
 import logger

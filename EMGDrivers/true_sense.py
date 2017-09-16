@@ -18,6 +18,20 @@ class Controller:
             except SerialException as e:
                 continue
 
+    def set_up(self):
+        self.get_status()
+        self.get_relax_parameters()
+        self.get_relax_data()
+        self.reset_relax_variables()
+        self.turn_spi_on()
+        # 5
+        self.turn_spi_off()
+        # 5
+        self.set_rf_mode()
+        # 5
+        self.turn_module_on()
+        self.turn_uc_on()
+
     def request_data(self):
         return self.basic_request(0x10, payload=[0x00], msg='Request wireless truesense data from unicon')
 
@@ -75,10 +89,15 @@ class Controller:
         return Packet.read_from_stream(src, self._logger)
 
 
+"""
+    Packet classes
+"""
+
+
 class Packet:
     def create_packet(data_code, payload):
-        wired = Packet._wired_packet(data_code, payload)
-        return Packet._link_packet(wired)
+        wired = WiredPacket(data_code, payload)
+        return LinkPacket(wired.to_list()).to_list()
 
     def read_from_stream(stream, logger):
         logger.debug('About to read a packet...')
@@ -111,22 +130,38 @@ class Packet:
 
         return (list(header), payload, checksum)
 
-    def _link_packet(payload):
-        return [SYNC_BYTE, SYNC_BYTE] + Packet._get_length(payload) + payload + Packet._get_checksum(payload)
 
-    def _wired_packet(data_code, payload):
-        return [data_code] + payload
+class LinkPacket():
+    def __init__(self, payload=[]):
+        self.payload = payload
 
-    def _get_checksum(payload):
-        chk = sum(payload)
+    def to_list(self):
+        return [SYNC_BYTE, SYNC_BYTE] + self._get_length() + self.payload + self._get_checksum()
+
+    def _get_length(self):
+        high_byte = ((len(self.payload)) >> 8) & 0xff
+        low_byte = (len(self.payload)) & 0xff
+        return [high_byte, low_byte]
+
+    def _get_checksum(self):
+        chk = sum(self.payload)
         high_byte = chk >> 8
         low_byte = chk
         return [high_byte, low_byte]
 
-    def _get_length(payload):
-        high_byte = ((len(payload)) >> 8) & 0xff
-        low_byte = (len(payload)) & 0xff
-        return [high_byte, low_byte]
+
+class WiredPacket():
+    def __init__(self, data_code, payload=[]):
+        self.data_code = data_code
+        self.payload = payload
+
+    def to_list(self):
+        return [self.data_code] + self.payload
+
+
+"""
+    Exceptions
+"""
 
 
 class SyncError(Exception):
