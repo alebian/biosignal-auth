@@ -4,7 +4,7 @@ from true_sense import FilePacket, WirelessDataPacket
 
 
 FILES = [
-    'data/E20170908_174900_ALL.opi'
+    'test_data_files/E20170908_174900_ALL.opi'
 ]
 
 
@@ -59,6 +59,5 @@ if __name__ == '__main__':
                 for x in data_frame.adc_values:
                     adc_values.append(x)
 
-        plt.axis([0, len(adc_values), WirelessDataPacket.PHYSICAL_MIN, WirelessDataPacket.PHYSICAL_MAX])
         plt.plot(adc_values)
         plt.show()

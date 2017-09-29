@@ -1,12 +1,14 @@
 import statistics
 from serial import Serial, SerialException
+import json
 
 from logger import get_logger
 import settings
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, scale=True):
+        self.scale = scale
         self._logger = get_logger()
         # Try all known ports
         for port in settings.POSSIBLE_PORTS:
@@ -34,8 +36,9 @@ class Controller:
         self.turn_uc_on()
 
     def request_data(self):
-        return self.basic_request(0x10, payload=[0x00],
-                                  msg='Request wireless truesense data from unicon')
+        packet = self.basic_request(0x10, payload=[0x00],
+                                    msg='Request wireless truesense data from unicon')
+        return WirelessDataPacket(packet.payload, scale=self.scale)
 
     def get_status(self):
         return self.basic_request(0x10, payload=[0x01], msg='Gets the plugged in UC status')
@@ -104,6 +107,42 @@ class Controller:
         if src is None:
             src = self.serial
         return LinkPacket.read_from_stream(src, self._logger)
+
+    def save_values_to_file(self, path, data):
+        with open(settings.TEMP_SCAN, 'w') as fp:
+            json.dump(data, fp, sort_keys=True, indent=4)
+
+    def sample_size(self, size=1):
+        adc_values = []
+        temperatures = []
+        x_values = []
+        y_values = []
+        z_values = []
+
+        while len(adc_values) < size:
+            packet = self.request_data()
+            if packet.has_data():
+                adc_values = adc_values + packet.adc_values
+                temperatures.append(packet.temperature)
+                x_values.append(packet.accelerometer[0])
+                y_values.append(packet.accelerometer[1])
+                z_values.append(packet.accelerometer[2])
+
+        return self.build_data_json(adc_values, temperatures, x_values, y_values, z_values)
+
+    def build_data_json(self, adc=None, temperatures=None, x=None, y=None, z=None):
+        data = {}
+        if adc is not None:
+            data['adc_values'] = adc
+        if temperatures is not None:
+            data['temperatures'] = temperatures
+        if x is not None:
+            data['x'] = x
+        if y is not None:
+            data['y'] = y
+        if z is not None:
+            data['z'] = z
+        return data
 
 
 def grouped(iterable, n):
@@ -217,7 +256,7 @@ class WirelessDataPacket():
     ADC_VALUE_LENGTH = 14
     BYTE_VALUE_LENGTH = 8
 
-    def __init__(self, payload, scale=False):
+    def __init__(self, payload, scale=True):
         self.payload = payload
         self.scale = scale
         self._logger = get_logger()

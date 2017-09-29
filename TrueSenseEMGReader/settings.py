@@ -21,3 +21,5 @@ LOG_FORMAT = '%(asctime)s [%(levelname)-5.5s] %(message)s'
 LOG_DATE_FORMAT = '%m/%d/%Y %I:%M:%S %p'
 LOG_FILE = 'true_sense.log'
 LOG_CONSOLE = True
+
+TEMP_SCAN = 'temp.json'
