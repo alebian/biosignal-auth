@@ -114,6 +114,21 @@ def number_to_2s_complement(number, n):
     return number if (number >> n - 1) == 0 else number - (1 << n)
 
 
+def byte_to_string(number):
+    return '{0:08b}'.format(number)
+
+
+alternate = lambda x: '0' if (x == '1') else '1'
+
+
+def twos_complement_string_to_int(number):
+    if number[0] == '1':
+        l = list(map(alternate, list(number)))
+        return -1 * (int(''.join(l), 2) + 1)
+    else:
+        return int(number, 2)
+
+
 class LinkPacket():
     SYNC_BYTE = 0x33
 
@@ -284,8 +299,12 @@ class WirelessDataPacket():
             if data_corruption == WirelessDataPacket.CORRUPTED_DATA:
                 self._logger.debug('Corrupted data found')
                 break
-            number = number_to_2s_complement((high << 6) + (low >> 2),
-                                             WirelessDataPacket.ADC_VALUE_LENGTH)
+
+            h_s = byte_to_string(high)
+            l_s = byte_to_string(low)
+            t_s = h_s + l_s[0:6]
+            # number = number_to_2s_complement((high << 6) + (low >> 2), WirelessDataPacket.ADC_VALUE_LENGTH)
+            number = twos_complement_string_to_int(t_s)
             number = self._scale(number)
             self.adc_values.append(number)
 
@@ -295,16 +314,20 @@ class WirelessDataPacket():
 
     def _decode_accelerometer(self):
         raw_data = self.payload[-7:-1]
-        accelerometer_x = number_to_2s_complement(raw_data[0],
-                                                  WirelessDataPacket.BYTE_VALUE_LENGTH)
-        accelerometer_y = number_to_2s_complement(raw_data[1],
-                                                  WirelessDataPacket.BYTE_VALUE_LENGTH)
+        # accelerometer_x = number_to_2s_complement(raw_data[0], WirelessDataPacket.BYTE_VALUE_LENGTH)
+        # accelerometer_y = number_to_2s_complement(raw_data[1], WirelessDataPacket.BYTE_VALUE_LENGTH)
+        accelerometer_x = twos_complement_string_to_int(byte_to_string(raw_data[0]))
+        accelerometer_y = twos_complement_string_to_int(byte_to_string(raw_data[2]))
         # Z values are sampled at a higher rate, thus giving 4 values
         z = [
-            number_to_2s_complement(raw_data[2], WirelessDataPacket.BYTE_VALUE_LENGTH),
-            number_to_2s_complement(raw_data[3], WirelessDataPacket.BYTE_VALUE_LENGTH),
-            number_to_2s_complement(raw_data[4], WirelessDataPacket.BYTE_VALUE_LENGTH),
-            number_to_2s_complement(raw_data[5], WirelessDataPacket.BYTE_VALUE_LENGTH)
+            twos_complement_string_to_int(byte_to_string(raw_data[2])),
+            twos_complement_string_to_int(byte_to_string(raw_data[3])),
+            twos_complement_string_to_int(byte_to_string(raw_data[4])),
+            twos_complement_string_to_int(byte_to_string(raw_data[5]))
+            # number_to_2s_complement(raw_data[2], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            # number_to_2s_complement(raw_data[3], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            # number_to_2s_complement(raw_data[4], WirelessDataPacket.BYTE_VALUE_LENGTH),
+            # number_to_2s_complement(raw_data[5], WirelessDataPacket.BYTE_VALUE_LENGTH)
         ]
         accelerometer_z = statistics.mean(z)
 

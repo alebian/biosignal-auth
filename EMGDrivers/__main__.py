@@ -20,9 +20,8 @@ if __name__ == '__main__':
             max_val=WirelessDataPacket.VALUE_MAX
         )
 
-    temperature_plotter = DynamicPlotter(x_range=200, min_val=25, max_val=40, title='Temperature',
-                                         y_label='Celsius degrees', color='b')
-    accelerometer_plotter = DynamicAccelerometerPlotter()
+    # temperature_plotter = DynamicPlotter(x_range=200, min_val=25, max_val=40, title='Temperature', y_label='Celsius degrees', color='b')
+    # accelerometer_plotter = DynamicAccelerometerPlotter()
 
     while True:
         data_packet = truesense_controller.request_data()
@@ -31,5 +30,5 @@ if __name__ == '__main__':
         if packet.has_data():
             for x in packet.adc_values:
                 adc_plotter.plotdata(x)
-            temperature_plotter.plotdata(packet.temperature)
-            accelerometer_plotter.plotdata(packet.accelerometer)
+            # temperature_plotter.plotdata(packet.temperature)
+            # accelerometer_plotter.plotdata(packet.accelerometer)
