@@ -294,12 +294,14 @@ class WirelessDataPacket():
 
     def _decode_adc_values(self):
         adc_channel = self.payload[10:-8]
-        for high, low in grouped(adc_channel, 2):
-            data_corruption = low & WirelessDataPacket.SAMPLE_QUALITY_MASK
-            if data_corruption == WirelessDataPacket.CORRUPTED_DATA:
-                self._logger.debug('Corrupted data found')
-                break
 
+        # Check data corruption
+        data_corruption = adc_channel[1] & WirelessDataPacket.SAMPLE_QUALITY_MASK
+        if data_corruption == WirelessDataPacket.CORRUPTED_DATA:
+            self._logger.debug('Corrupted data found')
+            return
+
+        for high, low in grouped(adc_channel, 2):
             h_s = byte_to_string(high)
             l_s = byte_to_string(low)
             t_s = h_s + l_s[0:6]
