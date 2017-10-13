@@ -23,7 +23,8 @@ if __name__ == '__main__':
 
     adc_values = []
 
-    while len(adc_values) < size:
+    # while len(adc_values) < size:
+    while True:
         packet = truesense_controller.request_data()
 
         if packet.has_data():

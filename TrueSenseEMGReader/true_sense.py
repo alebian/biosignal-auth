@@ -1,3 +1,5 @@
+import time
+import datetime
 import statistics
 from serial import Serial, SerialException
 import json
@@ -108,8 +110,8 @@ class Controller:
             src = self.serial
         return LinkPacket.read_from_stream(src, self._logger)
 
-    def save_values_to_file(self, path, data):
-        with open(settings.TEMP_SCAN, 'w') as fp:
+    def save_values_to_file(self, path=settings.TEMP_SCAN, data=None):
+        with open(path, 'w') as fp:
             json.dump(data, fp, sort_keys=True, indent=4)
 
     def sample_size(self, size=1):
@@ -131,7 +133,13 @@ class Controller:
         return self.build_data_json(adc_values, temperatures, x_values, y_values, z_values)
 
     def build_data_json(self, adc=None, temperatures=None, x=None, y=None, z=None):
-        data = {}
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+
+        data = {
+            'timestamp': st
+        }
+
         if adc is not None:
             data['adc_values'] = adc
         if temperatures is not None:
