@@ -8,16 +8,24 @@ from plotters import DynamicPlotter
 DATA_FOLDER = "collected_data"
 PERSON_NAME = "alejandro"
 
+DEVICE_POSITIONS = ['flexor_pollicis', 'clexor_carpi', 'biceps', 'extensor_carpis', 'palmaris_longus']
+
 MOVEMENTS = [
-    { "key": "close_hand", "name": "Cerrar mano",         "desc": "Comenzando con la mano completamente abierta, cierrela por un instante y vuelva a abrirla" },
-    { "key": "finger_0",   "name": "Cerrar dedo gordo",   "desc": "Comenzando con la mano completamente abierta, cierre el dedo gordo por completo" },
-    { "key": "finger_1",   "name": "Cerrar dedo indice",  "desc": "Comenzando con la mano completamente abierta, cierre el dedo indice por completo" },
-    { "key": "finger_2",   "name": "Cerrar dedo mayor",   "desc": "Comenzando con la mano completamente abierta, cierre el dedo mayor por completo" },
-    { "key": "finger_3",   "name": "Cerrar dedo anular",  "desc": "Comenzando con la mano completamente abierta, cierre el dedo anular por completo" },
-    { "key": "finger_4",   "name": "Cerrar dedo meñique", "desc": "Comenzando con la mano completamente abierta, cierre el dedo meñique por completo" }
+    { "key": "close_hand",               "name": "Cerrar mano",               "desc": "Comenzando con la mano completamente abierta, cierrela por un instante y vuelva a abrirla" },
+    { "key": "closed_hand",              "name": "Mano cerrada",              "desc": "Comenzar y mantener la mano cerrada" },
+    { "key": "open_hand",                "name": "Mano abierta",              "desc": "Comenzar y mantener la mano abierta" },
+    { "key": "finger_0",                 "name": "Cerrar dedo gordo",         "desc": "Comenzando con la mano completamente abierta, cierre el dedo gordo por completo" },
+    { "key": "finger_1",                 "name": "Cerrar dedo indice",        "desc": "Comenzando con la mano completamente abierta, cierre el dedo indice por completo" },
+    { "key": "finger_2",                 "name": "Cerrar dedo mayor",         "desc": "Comenzando con la mano completamente abierta, cierre el dedo mayor por completo" },
+    { "key": "finger_3",                 "name": "Cerrar dedo anular",        "desc": "Comenzando con la mano completamente abierta, cierre el dedo anular por completo" },
+    { "key": "finger_4",                 "name": "Cerrar dedo meñique",       "desc": "Comenzando con la mano completamente abierta, cierre el dedo meñique por completo" },
+    { "key": "wrist_flexion",            "name": "Flexion de muñeca",         "desc": "Comenzar con la mano extendida y flexionar la muñeca" },
+    { "key": "wrist_extension",          "name": "Extension de muñeca",       "desc": "Comenzar con la mano extendida y extender la muñeca" },
+    { "key": "wrist_flexion_complete",   "name": "Flexion de muñeca total",   "desc": "Comenzar y mantener flexionada la muñeca" },
+    { "key": "wrist_extension_complete", "name": "Extension de muñeca total", "desc": "Comenzar y mantener extendendida la muñeca" },
 ]
 
-NUMBER_OF_SAMPLES = 5
+NUMBER_OF_SAMPLES = 20
 SAMPLE_SIZE = 400
 COUNTDOWN = 3
 
@@ -28,49 +36,50 @@ def prompt_continue():
     input("Presione enter para continuar...")
 
 def take_sample(controller, plotter, movement, sample_number):
-    folder = "{}/{}".format(DATA_FOLDER, PERSON_NAME)
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    ts = time.time()
-    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
-    data_file = "{}/{}_{}_{}.json".format(folder, movement["key"], sample_number, st)
+    for device_position in DEVICE_POSITIONS:
+        folder = "{}/{}/{}".format(DATA_FOLDER, PERSON_NAME, device_position)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+        data_file = "{}/{}_{}_{}.json".format(folder, movement["key"], sample_number, st)
 
-    print("       Movimiento: {}".format(movement["name"]))
-    print("      Descripcion: {}".format(movement["desc"]))
-    print("Numero de muestra: {} de {}".format(sample_number, NUMBER_OF_SAMPLES))
-    prompt_continue()
-    print("Comienza a realizar el movimiento a la cuenta de {}".format(COUNTDOWN))
-    for x in range(1, COUNTDOWN + 1):
-        print(x)
-        time.sleep(1)
-    print("Ahora!")
+        print("       Movimiento: {}".format(movement["name"]))
+        print("      Descripcion: {}".format(movement["desc"]))
+        print("Numero de muestra: {} de {}".format(sample_number, NUMBER_OF_SAMPLES))
+        prompt_continue()
+        print("Comienza a realizar el movimiento a la cuenta de {}".format(COUNTDOWN))
+        for x in range(1, COUNTDOWN + 1):
+            print(x)
+            time.sleep(1)
+        print("Ahora!")
 
-    take_sample = True
-    adc_values = None
-    plotted = 0
-    while take_sample:
-        adc_values = []
-        while len(adc_values) < SAMPLE_SIZE:
-            packet = controller.request_data()
-            if packet.has_data():
-                adc_values = adc_values + packet.adc_values
-
-                for x in packet.adc_values:
-                    if plotted < SAMPLE_SIZE:
-                        plotter.plotdata(x)
-                        plotted += 1
+        take_sample = True
+        adc_values = None
         plotted = 0
+        while take_sample:
+            adc_values = []
+            while len(adc_values) < SAMPLE_SIZE:
+                packet = controller.request_data()
+                if packet.has_data():
+                    adc_values = adc_values + packet.adc_values
 
-        print("Muestra tomada correctamente")
-        again = input("Desea tomar la muestra nuevamente? [y/N]")
-        if again != "y":
-            take_sample = False
+                    for x in packet.adc_values:
+                        if plotted < SAMPLE_SIZE:
+                            plotter.plotdata(x)
+                            plotted += 1
+            plotted = 0
 
-    controller.save_values_to_file(
-        data_file,
-        controller.build_data_json(adc_values)
-    )
-    print("Muestra guardada correctamente")
+            print("Muestra tomada correctamente")
+            again = input("Desea tomar la muestra nuevamente? [y/N]")
+            if again != "y":
+                take_sample = False
+
+        controller.save_values_to_file(
+            data_file,
+            controller.build_data_json(adc_values)
+        )
+        print("Muestra guardada correctamente")
     print("Gracias!")
 
 
