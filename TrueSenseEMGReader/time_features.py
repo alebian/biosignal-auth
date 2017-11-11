@@ -50,7 +50,7 @@ def modified_mean_absolute_value_2(data):
     return math.fsum(abs(x) * _mmav2_wn(x, N) for x in data) / N
 
 
-def mean_absolute_value_slope(data, i):
+def mean_absolute_value_slope(data, i = 1):
     """
     (MAVSLP) is a modified version of MAV. The differences between the MAVs of adjacent
     segments are determined.
@@ -137,3 +137,19 @@ def willison_amplitude(data, threshold = THRESHOLD):
     for i in range(0, len(data) - 1):
         ans += _slope_sign_change_f(math.fabs(data[i] - data[i + 1]), threshold)
     return ans
+
+
+FEATURES = {
+    "integrated_emg": integrated_emg,
+    "mean_absolute_value": mean_absolute_value,
+    "modified_mean_absolute_value_1": modified_mean_absolute_value_1,
+    "modified_mean_absolute_value_2": modified_mean_absolute_value_2,
+    "mean_absolute_value_slope": mean_absolute_value_slope,
+    "simple_square_integral": simple_square_integral,
+    "variance_of_emg": variance_of_emg,
+    "root_mean_square": root_mean_square,
+    "waveform_length": waveform_length,
+    "zero_crossing": zero_crossing,
+    "slope_sign_change": slope_sign_change,
+    "willison_amplitude": willison_amplitude
+}
