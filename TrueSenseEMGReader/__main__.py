@@ -14,8 +14,8 @@ if __name__ == '__main__':
 
     adc_plotter = DynamicPlotter(
         x_range=size,
-        min_val=WirelessDataPacket.PHYSICAL_MIN,
-        max_val=WirelessDataPacket.PHYSICAL_MAX
+        min_val=WirelessDataPacket.PHYSICAL_MIN + 500,
+        max_val=WirelessDataPacket.PHYSICAL_MAX - 500
     )
 
     # temperature_plotter = DynamicPlotter(x_range=200, min_val=25, max_val=40, title='Temperature', y_label='Celsius degrees', color='b')
