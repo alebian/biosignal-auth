@@ -16,7 +16,7 @@ POSSIBLE_PORTS = [
 
 BAUDRATE = 57600
 
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 LOG_FORMAT = '%(asctime)s [%(levelname)-5.5s] %(message)s'
 LOG_DATE_FORMAT = '%m/%d/%Y %I:%M:%S %p'
 LOG_FILE = 'emg_shield.log'
