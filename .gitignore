@@ -3,3 +3,6 @@
 env
 .idea
 *.ipynb
+*.pyc
+*.png
+.vscode

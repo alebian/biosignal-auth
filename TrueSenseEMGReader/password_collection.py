@@ -5,7 +5,7 @@ import time
 
 from true_sense import Controller
 
-person = 'romina'
+person = 'luis'
 samples = 20
 
 
