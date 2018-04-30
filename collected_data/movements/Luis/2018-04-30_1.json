@@ -1,0 +1,22 @@
+{
+    "channel0": [
+        102
+    ],
+    "channel1": [
+        784
+    ],
+    "channel2": [
+        821
+    ],
+    "channel3": [
+        820
+    ],
+    "channel4": [
+        838
+    ],
+    "channel5": [
+        839
+    ],
+    "timestamp": "2018-04-30 16:07",
+    "type": "EMGSHield"
+}
