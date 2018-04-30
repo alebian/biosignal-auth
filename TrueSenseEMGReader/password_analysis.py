@@ -7,8 +7,8 @@ from time_features import FEATURES
 import noise_reduction
 import file_helpers
 
-ale_files = file_helpers.get_values_from_file('collected_data/passwords/alejandro/**/*.json')
-luis_files = file_helpers.get_values_from_file('collected_data/passwords/luis/**/*.json')
+ale_values = list(map(lambda x: file_helpers.get_values_from_file(x), file_helpers.get_all_files('collected_data/passwords/alejandro/**/*.json')))
+luis_values = list(map(lambda x: file_helpers.get_values_from_file(x), file_helpers.get_all_files('collected_data/passwords/luis/**/*.json')))
 
 
 def _pre_process_signal(values):
@@ -26,9 +26,6 @@ if __name__ == '__main__':
 
     for feature_name, feature in FEATURES.items():
         # Para todas las combinaciones de wavelet, mode y threshold ver en cual el promedio de las features esta mas alejado del resto
-        ale_values = list(map(lambda x: file_helpers.get_values_from_file(x), ale_files))
-        luis_values = list(map(lambda x: file_helpers.get_values_from_file(x), luis_files))
-
         ale_features = list(map(lambda x: extract_feature(feature_name, x), ale_values))
         luis_features = list(map(lambda x: extract_feature(feature_name, x), luis_values))
 
