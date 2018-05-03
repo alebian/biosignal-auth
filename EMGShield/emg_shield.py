@@ -17,21 +17,23 @@ class Controller(object):
                 self.serial = Serial(port=port, baudrate=settings.BAUDRATE, bytesize=EIGHTBITS, parity=PARITY_NONE, stopbits=STOPBITS_ONE, timeout=3)
                 self._logger.info(str.format("Using device in port: {}", port))
                 break
-            except SerialException:
+            except SerialException as e:
                 continue
         if not self.serial:
             self._logger.error('Device not found in any of the known ports')
             raise SerialException
 
-    def read_data(self, times):
-        i = 0
-        while i < times:
+    def read_data(self, times=0):
+        i = 1
+        while True:
+            if times and i > times:
+                break
             packet = self._read_packet()
             yield packet
             i+=1
 
     def _read_packet(self):
-        self._logger.info("reading packet")
+        self._logger.debug("reading packet")
         sync2 = 0
         while sync2 != 90:
             sync1 = int.from_bytes(self.serial.read(), 'big')
@@ -63,7 +65,7 @@ class Controller(object):
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
 
             data = {
-                'type': 'EMGSHield',
+                'type': 'EMGShield',
                 'timestamp': st
             }
 
