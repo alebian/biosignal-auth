@@ -7,7 +7,7 @@ import plotters
 import settings
 
 logger = get_logger()
-plotter = plotters.mpl.DynamicPlotter(x_range=5000,min_val=0,max_val=2000, linewidth=1.0)
+plotter = plotters.mpl.DynamicPlotter(channels=1, x_range=5000,min_val=0,max_val=2000, linewidth=1.0)
 c = emg_shield.Controller()
 q = queue.Queue()
 
@@ -34,7 +34,7 @@ try:
         vals = p.channels  
         if vals is None:
             exit(1)
-        plotter.plotdata(vals)
+        plotter.plotdata([vals[0]])
 except Exception as e:
     logger.exception(e)
     pass

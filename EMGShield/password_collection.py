@@ -1,5 +1,5 @@
 from emg_shield import EMGShieldController
-from passwords import DataCollectionThread
+from passwords import PasswordCollectionThread
 
 samples = 1
 name = 'Luis'
@@ -8,7 +8,7 @@ if __name__ == '__main__':
     controller = EMGShieldController()
     print("Bienvenido!")
     for x in range(1, samples + 1):
-        truesense = DataCollectionThread(controller, name, x)
+        truesense = PasswordCollectionThread(controller, name, x)
 
         print("Esta es la muestra {}".format(x))
         input("Presione enter para continuar...")

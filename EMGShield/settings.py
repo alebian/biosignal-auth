@@ -3,6 +3,7 @@ import logging
 POSSIBLE_PORTS = [
     # Linux
     '/dev/ttyACM0',
+    '/dev/ttyUSB0',
     # MAC
     '/dev/tty.usbmodem1411',
     '/dev/tty.usbmodem1421',

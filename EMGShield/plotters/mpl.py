@@ -9,21 +9,30 @@ import matplotlib.pyplot as plt
 logger = logging.getLogger()
 
 class DynamicPlotter(object):
-    def __init__(self, x_range=5000, min_val=-100, max_val=100,
+    def __init__(self, channels, x_range=5000, min_val=-100, max_val=100,
                  color='r', linewidth=2.0, title='', y_label='', x_label=''):
+        self.channels = channels
+        def get_subplots(c):
+            if c == 5 or c == 6: return 320
+            if c == 3 or c == 4: return 220
+            if c == 2: return 210
+            if c == 1: return 110
+            raise ValueError("unsupported number of channels")
+        self.subplots = get_subplots(channels)
         plt.ion()
 
-        self.x = [None]*6
+
+        self.x = [None]*self.channels
         self.x_range = x_range
         self.fig = plt.figure()
-        self.ax = [None]*6
-        self.line1 = [None]*6
-        self.plotx = [None]*6
+        self.ax = [None]*self.channels
+        self.line1 = [None]*self.channels
+        self.plotx = [None]*self.channels
 
-        for i in range(0,6):
+        for i in range(0,self.channels):
             self.x[i] = []
             self.plotx[i] = []
-            self.ax[i] = self.fig.add_subplot(320 + i+1)
+            self.ax[i] = self.fig.add_subplot(self.subplots + i+1)
             plt.title("channel {0}".format(i))
             plt.xlabel(x_label)
             plt.ylabel(y_label)
