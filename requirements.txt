@@ -1,5 +1,5 @@
 pyserial==3.4
-matplotlib==2.1.0
+matplotlib==2.1.1
 PyWavelets==0.5.2
 Flask==1.0.2
 PyJWT==1.6.1
