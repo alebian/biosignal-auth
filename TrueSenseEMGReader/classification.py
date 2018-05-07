@@ -65,3 +65,10 @@ if __name__ == '__main__':
         train(data[0], train_data)
         predictions = list(map(lambda x: prediction(data[0], x), test_data))
         print('Average prediction for {} is {:.2f}%'.format(data[0], np.mean(predictions) * 100))
+
+    train('ale2', ale_files)
+    predictions = list(map(lambda x: prediction('ale2', x), luis_files))
+    print('Average prediction for {} is {:.2f}%'.format('ale2', np.mean(predictions) * 100))
+    train('luis2', luis_files)
+    predictions = list(map(lambda x: prediction('luis2', x), ale_files))
+    print('Average prediction for {} is {:.2f}%'.format('luis2', np.mean(predictions) * 100))

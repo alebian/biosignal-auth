@@ -192,3 +192,4 @@ pip-selfcheck.json
 
 .idea
 temp.json
+*.png

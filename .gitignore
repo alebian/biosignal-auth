@@ -1,6 +1,7 @@
 *.log
 *.DS_Store
 env
+.vscode
 .idea
 *.ipynb
 *.pyc

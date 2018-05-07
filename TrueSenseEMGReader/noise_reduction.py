@@ -129,7 +129,7 @@ if __name__ == '__main__':
     #_calculate_average_features()
 
     original_signal = file_helpers.get_values_from_file(password_file)
-    filtered_signal = filter_emg_signal(original_signal, wavelet='sym5', threshold_value=6.0)
+    filtered_signal = filter_emg_signal(original_signal, wavelet='sym5', threshold_value=3.0)
     plot(original_signal, filtered_signal)
 
 
