@@ -1,11 +1,6 @@
 pyserial==3.4
 matplotlib==2.1.1
 PyWavelets==0.5.2
-Flask==1.0.2
-PyJWT==1.6.1
-psycopg2==2.7.4
-orator==0.9.7
-bcrypt==3.1.4
 ## The following requirements were added by pip freeze:
 bleach==2.1.1
 cycler==0.10.0
