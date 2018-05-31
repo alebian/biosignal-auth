@@ -1,0 +1,5 @@
+Flask==1.0.2
+PyJWT==1.6.1
+psycopg2==2.7.4
+orator==0.9.7
+bcrypt==3.1.4

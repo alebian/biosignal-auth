@@ -3,29 +3,19 @@ import jwt
 from orator import DatabaseManager, Model
 import bcrypt
 
-SECRET = 'f187418a8f99847aa66912dfb87f9c865fdb5a628475a507393c2fed4d810593fd127cbd293a23088c9144e15dc9742ba17e158963f41b0b8fde7a73926d42b9'
+import config
 
-DATABASE_CONFIG = {
-    'postgres': {
-        'driver': 'postgres',
-        'host': 'localhost',
-        'database': 'biosignal-auth',
-        'user': 'biosignal-auth',
-        'password': 'biosignal-auth',
-        'prefix': ''
-    }
-}
 
-db = DatabaseManager(DATABASE_CONFIG)
+db = DatabaseManager(config.DATABASES)
 Model.set_connection_resolver(db)
 app = Flask(__name__)
 
 
 def encode(payload):
-  return jwt.encode(payload, SECRET, algorithm='HS256')
+  return jwt.encode(payload, config.SECRET_KEY_BASE, algorithm='HS256')
 
 def decode(token):
-    return jwt.decode(token.split(' ')[1], SECRET, algorithm=['HS256'])
+    return jwt.decode(token.split(' ')[1], config.SECRET_KEY_BASE, algorithm=['HS256'])
 
 def hash_password(password):
     return bcrypt.hashpw(
@@ -74,4 +64,4 @@ def login():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')
