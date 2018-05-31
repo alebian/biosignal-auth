@@ -142,14 +142,14 @@ def willison_amplitude(data, threshold = THRESHOLD):
 FEATURES = {
     "integrated_emg": integrated_emg,
     "mean_absolute_value": mean_absolute_value,
-    "modified_mean_absolute_value_1": modified_mean_absolute_value_1,
-    "modified_mean_absolute_value_2": modified_mean_absolute_value_2,
-    "mean_absolute_value_slope": mean_absolute_value_slope,
+    #"modified_mean_absolute_value_1": modified_mean_absolute_value_1,
+    #"modified_mean_absolute_value_2": modified_mean_absolute_value_2,
+    #"mean_absolute_value_slope": mean_absolute_value_slope,
     "simple_square_integral": simple_square_integral,
     "variance_of_emg": variance_of_emg,
     "root_mean_square": root_mean_square,
     "waveform_length": waveform_length,
-    "zero_crossing": zero_crossing,
-    "slope_sign_change": slope_sign_change,
-    "willison_amplitude": willison_amplitude
+    #"zero_crossing": zero_crossing,
+    #"slope_sign_change": slope_sign_change,
+    #"willison_amplitude": willison_amplitude
 }

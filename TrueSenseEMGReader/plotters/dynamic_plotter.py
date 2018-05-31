@@ -28,9 +28,11 @@ class DynamicPlotter:
         self.plotx.append(self.plcounter)
         self.line1.set_ydata(self.x)
         self.line1.set_xdata(self.plotx)
-        self.fig.canvas.draw()
-        plt.pause(0.0001)
+
         self.plcounter = self.plcounter + 1
+
+        if not self.plcounter % 10:
+            plt.pause(0.00001)
 
         if self.plcounter > self.x_range:
             self.plcounter = 0

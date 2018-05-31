@@ -1,0 +1,8 @@
+databases:
+  postgres:
+    driver: postgres
+    host: localhost
+    database: biosignal-auth
+    user: biosignal-auth
+    password: biosignal-auth
+    prefix: ''

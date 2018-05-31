@@ -1,25 +1,13 @@
-import json
-import glob
-import re
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-
 from data_collection import MOVEMENTS
 from time_features import FEATURES
+import file_helpers
 
 PLACEMENT = 'extensor_carpis'
 DATA_PATH = 'collected_data/alejandro/{}/**/*.json'.format(PLACEMENT)
 DATA_MOVEMENTS = list(map(lambda x: x['key'], MOVEMENTS))
-
-
-def files_matching(pattern):
-    return [x for x in glob.glob(DATA_PATH, recursive=True) if re.search(pattern, x)]
-
-
-def get_values_from_file(file):
-    with open(file) as data_file:
-        return json.load(data_file)['adc_values']
 
 
 def _pre_process_signal(data):
@@ -40,9 +28,9 @@ if __name__ == '__main__':
         for idx, movement in enumerate(DATA_MOVEMENTS):
             plt.title('Feature {} for placement {}'.format(feature_name, PLACEMENT))
 
-            files = files_matching(movement)
+            files = file_helpers.files_matching(movement)
             features = list(
-                map(lambda x: extract_feature(feature_name, get_values_from_file(x)), files)
+                map(lambda x: extract_feature(feature_name, file_helpers.get_values_from_file(x)), files)
             )
 
             plt.xticks(x, DATA_MOVEMENTS, rotation=45)

@@ -1,11 +1,13 @@
-import time
 import datetime
-import statistics
-from serial import Serial, SerialException
 import json
+import statistics
+import time
 
-from logger import get_logger
+from serial import Serial, SerialException
+
+from emg import EMGController, DataPacket
 import settings
+from logger import get_logger
 
 
 class Controller:
@@ -137,6 +139,7 @@ class Controller:
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
 
         data = {
+            'type': 'TrueSense',
             'timestamp': st
         }
 
@@ -445,3 +448,26 @@ class DataCodeError(Exception):
     def __str__(self):
         return repr(
             str.format('Invalid data code. Expected {} but received {}', self.expected, self.got))
+
+class TrueSenseDataPacket(DataPacket):
+    def __init__(self, packet):
+        self.packet = packet
+
+    def get_channels(self):
+        return [[self.packet.adc_values] + self.packet.accelerometer]
+
+    def has_data(self):
+        return self.packet.has_data()
+
+class TrueSenseController(EMGController):
+    def __init__(self):
+        super(TrueSenseController, self).__init__()
+        self.controller = Controller()
+        self.controller.set_up()
+        self.n_channels = 4
+    
+    def read_data(self):
+        return TrueSenseDataPacket(self.controller.request_data())
+
+    def build_json_data(self, channels):
+        self.controller.build_data_json(adc=channels[0], x=channels[1], y=channels[2], z=channels[3])
