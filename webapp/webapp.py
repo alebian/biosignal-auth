@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import jwt
 from orator import DatabaseManager, Model
 import bcrypt
@@ -9,7 +10,7 @@ import config
 db = DatabaseManager(config.DATABASES)
 Model.set_connection_resolver(db)
 app = Flask(__name__)
-
+CORS(app)
 
 def encode(payload):
   return jwt.encode(payload, config.SECRET_KEY_BASE, algorithm='HS256')
