@@ -1,0 +1,14 @@
+{
+    "plugins": [
+        "react"
+    ],
+    "extends": [
+        "airbnb",
+        "plugin:react/recommended"
+    ],
+    "rules": {
+        "react/jsx-filename-extension": "off",
+        "jsx-a11y/label-has-for": "off",
+        "react/default-props-match-prop-types": "off"
+    }
+}
