@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  web:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - 5001:80
+    networks:
+      - default
+
+networks:
+  default:

@@ -24,7 +24,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - 5000:5000
+      - 5000:80
     networks:
       - default
     depends_on:
