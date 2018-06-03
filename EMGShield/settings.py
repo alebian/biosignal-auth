@@ -7,6 +7,8 @@ POSSIBLE_PORTS = [
     # MAC
     '/dev/tty.usbmodem1411',
     '/dev/tty.usbmodem1421',
+    '/dev/cu.usbserial-AD01QBMW',
+    '/dev/tty.usbserial-AD01QBMW',
     # Windows
     'com1',
     'com2',
@@ -17,7 +19,7 @@ POSSIBLE_PORTS = [
 
 BAUDRATE = 57600
 
-LOG_LEVEL = logging.WARN
+LOG_LEVEL = logging.INFO
 LOG_FORMAT = '%(asctime)s [%(levelname)-5.5s] %(message)s'
 LOG_DATE_FORMAT = '%m/%d/%Y %I:%M:%S %p'
 LOG_FILE = 'emg_shield.log'

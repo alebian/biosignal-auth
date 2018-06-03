@@ -21,7 +21,7 @@ class Controller(object):
                 continue
         if not self.serial:
             self._logger.error('Device not found in any of the known ports')
-            raise SerialException
+            raise SerialException()
 
     def read_data(self, times=0):
         i = 1
@@ -71,7 +71,7 @@ class Controller(object):
 
             for i, channel in enumerate(channels):
                 data['channel{0}'.format(i)] = channel
-            
+
             return data
 
 
@@ -100,6 +100,6 @@ class EMGShieldController(EMGController):
 
     def read_data(self):
         return EMGShieldPacket(self.controller._read_packet())
-        
+
     def build_json_data(self, channels):
         return self.controller.build_data_json(channels)
