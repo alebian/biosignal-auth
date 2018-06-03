@@ -1,4 +1,5 @@
 import threading
+
 class DataCollectionThread(threading.Thread):
     def __init__(self, controller, subject_name, sample_n):
         super(DataCollectionThread, self).__init__()
