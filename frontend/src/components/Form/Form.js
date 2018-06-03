@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+
 import './Form.css';
+import CustomChart from '../CustomChart/CustomChart';
 
 const READERAPP_URL = 'http://localhost:5001/api/v1';
 
@@ -75,53 +77,61 @@ class Form extends Component {
             ? <div className="alert alert-warning" role="alert">{this.state.error || this.props.externalError}</div>
             : null
         }
-        <form>
-          <div className="form-group">
-            <label htmlFor="emailInput">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              id="emailInput"
-              aria-describedby="emailHelp"
-              placeholder="johndoe@example.com"
-              value={this.state.email}
-              onChange={this.handleEmailChange}
-            />
+        <div className="horizontal-split">
+          <form>
+            <div className="form-group">
+              <label htmlFor="emailInput">Email</label>
+              <input
+                type="email"
+                className="form-control"
+                id="emailInput"
+                aria-describedby="emailHelp"
+                placeholder="johndoe@example.com"
+                value={this.state.email}
+                onChange={this.handleEmailChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="passwordInput">Password</label>
+              <input
+                type="password"
+                className="form-control"
+                id="passwordInput"
+                value={this.state.password}
+                onChange={this.handlePasswordChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="tokenInput">Signal Token</label>
+              <input
+                type="text"
+                className="form-control"
+                id="tokenInput"
+                value={this.state.signalToken}
+                disabled
+              />
+            </div>
+            {
+              this.state.started
+              ? <button className="btn btn-info" onClick={this.stopReading}>Stop reading</button>
+              : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
+            }
+          </form>
+          <div className="chart-container">
+            {
+              this.state.started
+              ? <CustomChart token={this.state.signalToken} />
+              : null
+            }
           </div>
-          <div className="form-group">
-            <label htmlFor="passwordInput">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="passwordInput"
-              value={this.state.password}
-              onChange={this.handlePasswordChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="tokenInput">Signal Token</label>
-            <input
-              type="text"
-              className="form-control"
-              id="tokenInput"
-              value={this.state.signalToken}
-              disabled
-            />
-          </div>
-          {
-            this.state.started
-            ? <button className="btn btn-info" onClick={this.stopReading}>Stop reading</button>
-            : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
-          }
-          <br/>
-          <br/>
-          <button
-            className="btn btn-primary"
-            onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signalToken: this.state.signalToken})}
-          >
-            {this.props.submitText}
-          </button>
-        </form>
+        </div>
+        <br/>
+        <button
+          className="btn btn-primary"
+          onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signalToken: this.state.signalToken})}
+        >
+          {this.props.submitText}
+        </button>
       </div>
     );
   }

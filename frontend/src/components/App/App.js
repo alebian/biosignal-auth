@@ -66,7 +66,7 @@ class App extends Component {
               <p>{JSON.stringify(jwt_decode(this.state.token), null, 2)}</p>
             )
             : (
-              <div className="col-sm-6 offset-md-3">
+              <div className="col-sm-8 offset-md-1">
                 <Form
                   onSubmit={this.state.registerMenu ? this.handleRegisterSubmit : this.handleLoginSubmit}
                   submitText={this.state.registerMenu ? 'Sign up' : 'Log in'}
