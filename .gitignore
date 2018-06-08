@@ -4,6 +4,7 @@ env
 .vscode
 .idea
 *.ipynb
+!notebooks/*
 *.pyc
 *.png
 .vscode
