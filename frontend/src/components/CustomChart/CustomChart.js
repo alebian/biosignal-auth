@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
-import ReactChartkick, { ScatterChart } from 'react-chartkick';
+import ReactChartkick, { LineChart } from 'react-chartkick';
 import Chart from 'chart.js';
 
 ReactChartkick.addAdapter(Chart);
@@ -28,11 +28,12 @@ class CustomChart extends Component {
 
   componentWillUnmount() {
     clearInterval(this.timer);
+    this.setState({values: []});
   }
 
   render() {
     return (
-      <ScatterChart
+      <LineChart
         data={this.state.values}
         width="500px"
         height="300px"

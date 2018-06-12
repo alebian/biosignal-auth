@@ -54,6 +54,7 @@ def stop():
         database[token]['thread'].stop()
         # Sleep?
         signal = database[token]['signal']
+        database[token]['signal'] = []
         del database[token]
         return jsonify({ 'signal': signal }), 200
     except:
