@@ -10,6 +10,7 @@ class CreateDevicesTable(Migration):
         with self.schema.create('devices') as table:
             table.increments('id')
             table.string('external_id', 32)
+            table.string('ip_address', 16).nullable()
             table.integer('client_id').unsigned()
             table.foreign('client_id').references('id').on('clients').on_delete('cascade')
             table.timestamps()
