@@ -176,6 +176,11 @@ def get_devices(client):
         list(map(lambda x: { 'ip_address': x.ip_address, 'id': x.external_id }, client.devices))
     ), 200
 
+
+@app.route('/')
+def hello():
+    return 'Biosignal auth'
+
 if __name__ == "__main__":
-    # app.run(host='127.0.0.1', port=5001)
-    app.run(host='0.0.0.0', port=80)
+    # app.run(host='0.0.0.0', port=80)
+    app.run(host='127.0.0.1', port=8080)

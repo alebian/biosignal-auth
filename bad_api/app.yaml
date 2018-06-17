@@ -1,6 +1,8 @@
 runtime: custom
 env: flex
 
+entrypoint: gunicorn -b :$PORT main.app
+
 env_variables:
     POSTGRES_HOST: "104.197.173.216"
     POSTGRES_DB: "biosignal-auth"
