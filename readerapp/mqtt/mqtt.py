@@ -30,7 +30,7 @@ def error_str(rc):
     return '{}: {}'.format(rc, mqtt.error_string(rc))
 
 
-class Queue():
+class Mqtt():
     def __init__(self):
         self.should_backoff = False
         self.minimum_backoff_time = 1
