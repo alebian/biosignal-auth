@@ -68,6 +68,18 @@ def access_token_required(f):
         return f(client, *args, **kwargs)
     return decorated_function
 
+def levenstein_distance(str1, str2):
+  d = dict()
+  for i in range(len(str1)+1):
+     d[i] = dict()
+     d[i][0] = i
+  for i in range(len(str2)+1):
+     d[0][i] = i
+  for i in range(1, len(str1)+1):
+     for j in range(1, len(str2)+1):
+        d[i][j] = min(d[i][j-1]+1, d[i-1][j]+1, d[i-1][j-1]+(not str1[i-1] == str2[j-1]))
+  return d[len(str1)][len(str2)]
+
 ###################################################################################################
 #                                             THREADS                                             #
 ###################################################################################################
@@ -149,7 +161,9 @@ def compare_signals(client):
         if (signal_1.device.client_id != client.id) or (signal_2.device.client_id != client.id):
             return '', 403
 
-        return jsonify({ 'percentage': 1 }), 200 # TODO: calculate difference
+        return jsonify({
+            'percentage': (1 - levenstein_distance(signal_1.signal, signal_2.signal) / len(signal_1.signal))
+        }), 200 # TODO: calculate difference
     except ModelNotFound as e:
         return '', 404
 
@@ -163,5 +177,5 @@ def get_devices(client):
     ), 200
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=5001)
-    # app.run(host='0.0.0.0', port=80)
+    # app.run(host='127.0.0.1', port=5001)
+    app.run(host='0.0.0.0', port=80)

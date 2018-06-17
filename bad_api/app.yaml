@@ -1,0 +1,11 @@
+runtime: custom
+env: flex
+
+env_variables:
+    POSTGRES_HOST: "104.197.173.216"
+    POSTGRES_DB: "biosignal-auth"
+    POSTGRES_USER: "biosignal-auth"
+    POSTGRES_PASSWORD: "biosignal-auth1234"
+    JSON_KEY_FILE: "/app/key.json"
+    GOOGLE_APPLICATION_CREDENTIALS: "/app/key.json"
+    GCLOUD_PROJECT_ID: "proyecto-final-itba"

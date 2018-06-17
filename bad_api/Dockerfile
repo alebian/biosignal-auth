@@ -7,10 +7,12 @@ COPY requirements.txt ./
 RUN apk update && \
     apk add postgresql-libs && \
     apk add libffi-dev && \
+    apk add linux-headers && \
+    apk add alpine-sdk && \
     apk add --virtual .build-deps gcc musl-dev postgresql-dev
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "webapp.py"]
+CMD ["python", "bad_api.py"]

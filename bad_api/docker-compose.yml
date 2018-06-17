@@ -14,13 +14,14 @@ services:
 
   web:
     build: .
-    command: /bin/sh -c "orator migrate --config /app/config.py -f && python /app/webapp.py"
+    command: /bin/sh -c "orator migrate --config /app/config.py -f && python /app/bad_api.py"
     environment:
       - POSTGRES_PASSWORD=biosignal-auth
       - POSTGRES_USER=biosignal-auth
       - POSTGRES_DB=biosignal-auth
       - POSTGRES_HOST=db
-      - SECRET_KEY_BASE=f187418a8f99847aa66912dfb87f9c865fdb5a628475a507393c2fed4d810593fd127cbd293a23088c9144e15dc9742ba17e158963f41b0b8fde7a73926d42b9
+      - GOOGLE_APPLICATION_CREDENTIALS="/app/key.json"
+      - GCLOUD_PROJECT_ID="proyecto-final-itba"
     volumes:
       - .:/app
     ports:
