@@ -96,9 +96,9 @@ class MQTTListener(threading.Thread):
     def run(self):
         """The main loop. Consumes messages from the Pub/Sub subscription."""
         subscriber = pubsub.SubscriberClient()
-        subscription_path = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'signal')
+        signal_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'signal')
 
-        def callback(message):
+        def signal_callback(message):
             """Logic executed when a message is received from subscribed topic."""
             try:
                 device_id = message.attributes['deviceId']
@@ -123,8 +123,33 @@ class MQTTListener(threading.Thread):
 
             message.ack()
 
-        print('Listening for messages on {}'.format(subscription_path))
-        subscriber.subscribe(subscription_path, callback=callback)
+        print('Listening for messages on {}'.format(signal_subscription))
+        subscriber.subscribe(signal_subscription, callback=signal_callback)
+
+        status_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'status')
+
+        def status_callback(message):
+            """Logic executed when a message is received from subscribed topic."""
+            try:
+                device_id = message.attributes['deviceId']
+                data = json.loads(message.data)
+                ip_address = data['IP']
+
+                try:
+                  device = Device.where('external_id', device_id).first_or_fail()
+                  db.table('devices').where('id', device.id).update({'ip_address': ip_address})
+                except ModelNotFound as e:
+                  print('Device with id {} not found', device_id)
+
+            except ValueError as e:
+                print('Loading Payload ({}) threw an Exception: {}.'.format(message.data, e))
+                message.ack()
+                return
+
+            message.ack()
+
+        print('Listening for status on {}'.format(status_subscription))
+        subscriber.subscribe(status_subscription, callback=status_callback)
 
         # The subscriber is non-blocking, so keep the main thread from
         # exiting to allow it to process messages in the background.
