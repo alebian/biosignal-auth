@@ -204,7 +204,7 @@ def get_devices(client):
 
 @app.route('/')
 def hello():
-    return 'Biosignal auth'
+    return json.loads(open(os.environ['JSON_KEY_FILE'], 'r').read())['client_id']
 
 if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=80)
