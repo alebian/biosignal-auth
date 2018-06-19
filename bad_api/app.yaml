@@ -1,9 +1,5 @@
-runtime: python
+runtime: custom
 env: flex
-entrypoint: gunicorn -b :$PORT main:app
-
-runtime_config:
-  python_version: 3
 
 env_variables:
   POSTGRES_HOST: "104.197.173.216"
@@ -13,10 +9,3 @@ env_variables:
   JSON_KEY_FILE: "/app/key.json"
   GOOGLE_APPLICATION_CREDENTIALS: "/app/key.json"
   GCLOUD_PROJECT_ID: "proyecto-final-itba"
-
-manual_scaling:
-  instances: 1
-resources:
-  cpu: 1
-  memory_gb: 0.5
-  disk_size_gb: 10

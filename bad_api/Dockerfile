@@ -1,18 +1,13 @@
-FROM python:3.6.5-alpine3.7
+FROM gcr.io/google-appengine/python
 
-WORKDIR /app
+RUN virtualenv /env
 
-COPY requirements.txt ./
+ENV VIRTUAL_ENV /env
+ENV PATH /env/bin:$PATH
 
-RUN apk update && \
-    apk add postgresql-libs && \
-    apk add libffi-dev && \
-    apk add linux-headers && \
-    apk add alpine-sdk && \
-    apk add --virtual .build-deps gcc musl-dev postgresql-dev
+ADD requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+ADD . /app
 
-COPY . .
-
-CMD ["python", "main.py"]
+CMD gunicorn -b :$PORT main:app
