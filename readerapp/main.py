@@ -4,8 +4,6 @@ from flask_cors import CORS
 import string
 import random
 import uuid
-import time
-import socket
 import threading
 
 from emg_driver.emg_shield import EMGShieldController
@@ -35,25 +33,6 @@ def token_required(f):
             return jsonify({}), 404
         return f(token, *args, **kwargs)
     return decorated_function
-
-###################################################################################################
-#                                             THREADS                                             #
-###################################################################################################
-class MQTTStatusReporter(threading.Thread):
-    def __init__(self):
-        super(MQTTStatusReporter, self).__init__()
-
-    def run(self):
-        """Every minute send the current IP of the device."""
-        while True:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            q.publish_state({'IP': s.getsockname()[0]})
-            s.close()
-            time.sleep(60)
-
-thread = MQTTStatusReporter()
-thread.start()
 
 ###################################################################################################
 #                                            ENDPOINTS                                            #
@@ -114,5 +93,4 @@ def read(token):
 
 
 if __name__ == "__main__":
-    # app.run(host='0.0.0.0', port=80)
-    app.run(host='127.0.0.1', port=5001)
+    app.run(host='0.0.0.0', port=5001)
