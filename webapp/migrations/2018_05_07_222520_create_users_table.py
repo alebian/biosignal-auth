@@ -11,6 +11,7 @@ class CreateUsersTable(Migration):
             table.increments('id')
             table.string('email', 255).unique()
             table.string('password_hash', 255)
+            table.string('signal_uuid', 128)
             table.timestamps()
 
     def down(self):

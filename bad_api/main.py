@@ -180,8 +180,9 @@ def get_signal(client, uuid):
 def compare_signals(client):
     """Clients will use this endpoint to see if 2 signals are similar"""
     try:
-        signal_1 = Signal.where('external_uuid', request.get_json().get('signal_1_uuid')).first_or_fail()
-        signal_2 = Signal.where('external_uuid', request.get_json().get('signal_2_uuid')).first_or_fail()
+        data = request.get_json()
+        signal_1 = Signal.where('external_uuid', data.get('signal_1_uuid')).first_or_fail()
+        signal_2 = Signal.where('external_uuid', data.get('signal_2_uuid')).first_or_fail()
 
         if (signal_1.device.client_id != client.id) or (signal_2.device.client_id != client.id):
             return '', 403

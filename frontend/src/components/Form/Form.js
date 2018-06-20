@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import './Form.css';
 import CustomChart from '../CustomChart/CustomChart';
 
-const READERAPP_URL = 'http://localhost:5001/api/v1';
+const WEBAPP_URL = 'http://localhost:8000/api/v1';
 
 class Form extends Component {
   constructor(props) {
@@ -15,7 +15,9 @@ class Form extends Component {
       error: undefined,
       email: '',
       password: '',
-      signalToken: ''
+      deviceOptions: [],
+      signalUUID: '',
+      readerIP: undefined,
     };
   }
 
@@ -27,11 +29,21 @@ class Form extends Component {
     this.setState({email: event.target.value});
   };
 
+  deviceName = device => `${device.name} ${device.ip}`;
+
+  handleDeviceChange = event => {
+    const name = event.target.value;
+    const device = this.state.deviceOptions.filter(a => a.name === name)[0];
+    this.setState({
+      readerIP: device.ip
+    });
+  };
+
   startReading = () => {
-    axios.post(`${READERAPP_URL}/start`)
+    axios.post(`http://${this.state.readerIP}:5001/api/v1/start`)
       .then(response => {
         if (response.status === 201) {
-          this.setState({started: true, signalToken: response.data.signalToken});
+          this.setState({started: true, signalUUID: response.data.signalUUID});
         } else {
           this.setState({error: `Unexpected response code ${response.status}`});
         }
@@ -43,7 +55,7 @@ class Form extends Component {
   };
 
   stopReading = () => {
-    axios.post(`${READERAPP_URL}/stop`, {signalToken: this.state.signalToken})
+    axios.post(`http://${this.state.readerIP}:5001/api/v1/stop`, {signalUUID: this.state.signalUUID})
       .then(response => {
         if (response.status === 200) {
           this.setState({started: false});
@@ -57,9 +69,21 @@ class Form extends Component {
       });
   };
 
+  componentDidMount() {
+    axios.get(`${WEBAPP_URL}/devices`)
+      .then(response => {
+        this.setState({
+          deviceOptions: response.data.map(info => ({ name: info.id, ip: info.ip_address }))
+        });
+      })
+      .catch(error => {
+        console.log(`Error fetching devices: ${error}`);
+      });
+  }
+
   componentWillUnmount() {
-    if (this.state.started && this.state.signalToken) {
-      axios.post(`${READERAPP_URL}/cancel`, {signalToken: this.state.signalToken})
+    if (this.state.started && this.state.signalUUID) {
+      axios.post(`http://${this.state.readerIP}:5001/api/v1/cancel`, {signalUUID: this.state.signalUUID})
       .then(response => {
         console.log('Successfully canceled reading');
       })
@@ -102,33 +126,49 @@ class Form extends Component {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="tokenInput">Signal Token</label>
-              <input
-                type="text"
-                className="form-control"
-                id="tokenInput"
-                value={this.state.signalToken}
-                disabled
-              />
+              <select className="form-control" onChange={this.handleDeviceChange}>
+                {
+                  this.state.deviceOptions.map(deviceInfo => <option key={deviceInfo.name} value={deviceInfo.name}>{this.deviceName(deviceInfo)}</option>)
+                }
+              </select>
             </div>
             {
-              this.state.started
-              ? <button className="btn btn-info" onClick={this.stopReading}>Stop reading</button>
-              : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
+              this.state.readerIP
+              ? <div>
+                  <div className="form-group">
+                    <label htmlFor="tokenInput">Signal Token</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="tokenInput"
+                      value={this.state.signalUUID}
+                      disabled
+                    />
+                  </div>
+                  {
+                    this.state.started
+                    ? <button className="btn btn-info" onClick={this.stopReading}>Stop reading</button>
+                    : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
+                  }
+                </div>
+              : null
             }
           </form>
           <div className="chart-container">
             {
-              this.state.started
-              ? <CustomChart token={this.state.signalToken} />
-              : null
+              this.state.readerIP && this.state.signalUUID &&
+              <CustomChart
+                reading={this.state.started}
+                url={`http://${this.state.readerIP}:5001/api/v1/read`}
+                token={this.state.signalUUID}
+              />
             }
           </div>
         </div>
         <br/>
         <button
           className="btn btn-primary"
-          onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signalToken: this.state.signalToken})}
+          onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signal_token: this.state.signalUUID})}
         >
           {this.props.submitText}
         </button>

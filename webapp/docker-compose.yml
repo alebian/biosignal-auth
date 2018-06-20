@@ -21,7 +21,7 @@ services:
       - POSTGRES_DB=biosignal-auth
       - POSTGRES_HOST=db
       - SECRET_KEY_BASE=f187418a8f99847aa66912dfb87f9c865fdb5a628475a507393c2fed4d810593fd127cbd293a23088c9144e15dc9742ba17e158963f41b0b8fde7a73926d42b9
-      - ACCESS_TOKEN=6xvsTWmeLQ4wYeIyWizk5XfSIUCKlxbFESqgfLiU81c5r2rbarvoZohnoN3T3A4dqMCOo88JggRn52yMmZVq2g==
+      - ACCESS_KEY=6xvsTWmeLQ4wYeIyWizk5XfSIUCKlxbFESqgfLiU81c5r2rbarvoZohnoN3T3A4dqMCOo88JggRn52yMmZVq2g==
     volumes:
       - .:/app
     ports:
