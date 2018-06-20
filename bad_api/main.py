@@ -95,9 +95,6 @@ class MQTTListener(threading.Thread):
 
     def run(self):
         """The main loop. Consumes messages from the Pub/Sub subscription."""
-        subscriber = pubsub.SubscriberClient()
-        signal_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'signal')
-
         def signal_callback(message):
             """Logic executed when a message is received from subscribed topic."""
             try:
@@ -105,6 +102,7 @@ class MQTTListener(threading.Thread):
                 data = json.loads(message.data)
                 signal = data['signal']
                 uuid = data['uuid']
+                print('Received signal: {}'.format(uuid))
 
                 try:
                   device = Device.where('external_id', device_id).first_or_fail()
@@ -123,17 +121,13 @@ class MQTTListener(threading.Thread):
 
             message.ack()
 
-        print('Listening for messages on {}'.format(signal_subscription))
-        subscriber.subscribe(signal_subscription, callback=signal_callback)
-
-        status_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'status')
-
         def status_callback(message):
             """Logic executed when a message is received from subscribed topic."""
             try:
                 device_id = message.attributes['deviceId']
                 data = json.loads(message.data)
                 ip_address = data['IP']
+                print('Received status: {} {}'.format(device_id, ip_address))
 
                 try:
                   device = Device.where('external_id', device_id).first_or_fail()
@@ -148,12 +142,18 @@ class MQTTListener(threading.Thread):
 
             message.ack()
 
-        print('Listening for status on {}'.format(status_subscription))
-        subscriber.subscribe(status_subscription, callback=status_callback)
-
-        # The subscriber is non-blocking, so keep the main thread from
-        # exiting to allow it to process messages in the background.
         while True:
+            try:
+                subscriber = pubsub.SubscriberClient()
+                signal_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'signal')
+                print('Listening for messages on {}'.format(signal_subscription))
+                subscriber.subscribe(signal_subscription, callback=signal_callback)
+                status_subscription = subscriber.subscription_path(os.environ['GCLOUD_PROJECT_ID'], 'status')
+                print('Listening for status on {}'.format(status_subscription))
+                subscriber.subscribe(status_subscription, callback=status_callback)
+            except Exception as e:
+                pass
+
             time.sleep(60)
 
 thread = MQTTListener()
@@ -207,5 +207,4 @@ def hello():
     return json.loads(open(os.environ['JSON_KEY_FILE'], 'r').read())['client_id']
 
 if __name__ == "__main__":
-    # app.run(host='0.0.0.0', port=80)
-    app.run(host='127.0.0.1', port=8080)
+    app.run(host='0.0.0.0', port=8080)
