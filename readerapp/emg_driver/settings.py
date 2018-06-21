@@ -18,6 +18,10 @@ POSSIBLE_PORTS = [
 ]
 
 BAUDRATE = 57600
+WINDOW_SIZE = 50
+SPIKE_THRESHOLD = 650
+ZERO_THRESHOLD = 250
+ZERO_LENGTH = 500
 
 LOG_LEVEL = logging.INFO
 LOG_FORMAT = '%(asctime)s [%(levelname)-5.5s] %(message)s'

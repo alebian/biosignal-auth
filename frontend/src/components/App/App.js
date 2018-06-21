@@ -5,7 +5,7 @@ import jwt_decode from 'jwt-decode';
 import './App.css';
 import Form from '../Form/Form'
 
-const WEBAPP_URL = 'http://localhost:5000/api/v1';
+const WEBAPP_URL = 'http://localhost:8000/api/v1';
 
 class App extends Component {
   constructor(props) {
@@ -74,8 +74,8 @@ class App extends Component {
                 />
                 {
                   this.state.registerMenu
-                  ? <small className="form-text text-muted">Already have an account? <a href="#" onClick={this.switchRegisterMenu}>Log in</a></small>
-                  : <small className="form-text text-muted">Don't have an account? <a href="#" onClick={this.switchRegisterMenu}>Sign up</a></small>
+                  ? <p className="form-text text-muted">Already have an account? <a className="Link" onClick={this.switchRegisterMenu}>Log in</a></p>
+                  : <p className="form-text text-muted">Don't have an account? <a className="Link" onClick={this.switchRegisterMenu}>Sign up</a></p>
                 }
               </div>
               )

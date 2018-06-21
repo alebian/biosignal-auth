@@ -7,8 +7,6 @@ import Chart from 'chart.js';
 
 ReactChartkick.addAdapter(Chart);
 
-const READERAPP_URL = 'http://localhost:5001/api/v1';
-
 class CustomChart extends Component {
   constructor(props) {
     super(props);
@@ -18,17 +16,21 @@ class CustomChart extends Component {
   }
 
   componentDidMount() {
-    this.timer = setInterval(() => {
-      axios
-        .get(`${READERAPP_URL}/read?signalToken=${this.props.token}`)
-        .then(response => this.setState({ values: response.data }))
-        .catch(error => console.log(error));
-    }, 500);
+    if (this.props.url && this.props.token) {
+      this.timer = setInterval(() => {
+        if (this.props.reading) {
+          axios
+            .get(`${this.props.url}?signalUUID=${this.props.token}`)
+            .then(response => this.setState({ values: response.data }))
+            .catch(error => console.log(error));
+        }
+      }, 500);
+    }
   }
 
   componentWillUnmount() {
     clearInterval(this.timer);
-    this.setState({values: []});
+    this.setState({ values: [] });
   }
 
   render() {
@@ -43,6 +45,8 @@ class CustomChart extends Component {
 }
 
 CustomChart.propTypes = {
+  reading: PropTypes.bool.isRequired,
+  url: PropTypes.string.isRequired,
   token: PropTypes.string.isRequired,
 };
 
