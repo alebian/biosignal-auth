@@ -39,20 +39,21 @@ def token_required(f):
 ###################################################################################################
 @app.route("/api/v1/start", methods=['POST'])
 def start():
-    token = random_uuid()
+    # if manager was not stopped cancel collection
+    old_token = manager.stop_collection()
+    if old_token is not None:
+        del database[old_token]
+
+    new_token = random_uuid()
     values = []
-    database[token] = {
+    database[new_token] = {
         'signal': values
     }
-    # if manager was not stopped cancel collection#
-    token = manager.stop_collection()
-    if token is not None:
-        del database[token]
 
-    manager.start_collection(values, token)
+    manager.start_collection(values, new_token)
 
     return jsonify(
-        { 'signalUUID': token }
+        { 'signalUUID': new_token }
     ), 201
 
 
