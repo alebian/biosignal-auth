@@ -60,6 +60,7 @@ class Form extends Component {
       .then(response => {
         if (response.status === 200) {
           this.setState({started: false});
+          this.checkIfSignalArrived();
         } else {
           this.setState({error: `Unexpected response code ${response.status}`});
         }

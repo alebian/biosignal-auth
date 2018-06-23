@@ -6,11 +6,12 @@ import numpy as np
 import emg_driver.settings as settings
 
 class DataCollectionThread(threading.Thread):
-    def __init__(self, controller, storage):
+    def __init__(self, controller, storage, interpreted_storage):
         super(DataCollectionThread, self).__init__()
         self.controller = controller
         self.get_values = True
         self.storage = storage
+        self.interpreted_storage = interpreted_storage
         self.window_size = settings.WINDOW_SIZE
         self._encoder = EMGShieldEncoder()
 
@@ -20,9 +21,11 @@ class DataCollectionThread(threading.Thread):
             # packet = self.controller.read_data()
             # if packet.has_data():
             #     self.storage.extend(packet.get_channels()[0]) # We only care for channel0
-            enc = self._encoder.encode(next(generator))
+            n = next(generator)
+            self.storage.append(int(n))
+            enc = self._encoder.encode(n)
             if enc is not None:
-                self.storage.append(enc)
+                self.interpreted_storage.append(int(enc))
         print(self._encoder.get_binary())
         self._encoder.clear()
 
@@ -56,7 +59,7 @@ class EMGShieldEncoder(object):
         self._state = EMGShieldEncoder.EncodingState.STARTING
         self._binary = []
         self._last = None
-    
+
     def encode(self, value):
         if self._prev is not None:
             if self._prev < self._spike_threshold and value > self._spike_threshold:
@@ -77,7 +80,7 @@ class EMGShieldEncoder(object):
                     self._prev = value
                     return 0
         self._prev = value
-    
+
     def get_binary(self):
         return self._binary
 

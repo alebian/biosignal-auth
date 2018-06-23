@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
+import './CustomChart.css';
 import ReactChartkick, { LineChart } from 'react-chartkick';
 import Chart from 'chart.js';
 
@@ -12,6 +13,7 @@ class CustomChart extends Component {
     super(props);
     this.state = {
       values: [],
+      interpreted_values: [],
     };
   }
 
@@ -21,7 +23,12 @@ class CustomChart extends Component {
         if (this.props.reading) {
           axios
             .get(`${this.props.url}?signalUUID=${this.props.token}`)
-            .then(response => this.setState({ values: response.data }))
+            .then((response) => {
+              this.setState({
+                values: response.data.signal,
+                interpreted_values: response.data.interpreted_signal,
+              });
+            })
             .catch(error => console.log(error));
         }
       }, 500);
@@ -35,11 +42,18 @@ class CustomChart extends Component {
 
   render() {
     return (
-      <LineChart
-        data={this.state.values}
-        width="500px"
-        height="300px"
-      />
+      <div className="ChartsContainer">
+        <LineChart
+          data={this.state.values}
+          width="500px"
+          height="225px"
+        />
+        <LineChart
+          data={this.state.interpreted_values}
+          width="500px"
+          height="225px"
+        />
+      </div>
     );
   }
 }

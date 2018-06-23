@@ -46,11 +46,13 @@ def start():
 
     new_token = random_uuid()
     values = []
+    interpreted_values = []
     database[new_token] = {
-        'signal': values
+        'signal': values,
+        'interpreted_signal': interpreted_values
     }
 
-    manager.start_collection(values, new_token)
+    manager.start_collection(values, interpreted_values, new_token)
 
     return jsonify(
         { 'signalUUID': new_token }
@@ -62,9 +64,7 @@ def start():
 def stop(token):
     try:
         manager.stop_collection()
-        # Sleep?
-        signal = database[token]['signal']
-        database[token]['signal'] = []
+        signal = database[token]['interpreted_signal']
         del database[token]
 
         q.publish_event({'uuid': token, 'signal': signal})
@@ -87,11 +87,12 @@ def cancel(token):
 @app.route("/api/v1/read", methods=['GET'])
 @token_required
 def read(token):
-    try:
-        values = database[token]['signal']
-        return jsonify([[i, x] for i, x in enumerate(values)]), 200
-    except:
-        return jsonify({}), 500
+    values = database[token]['signal']
+    interpreted_values = database[token]['interpreted_signal']
+    return jsonify({
+        'signal': [[i, x] for i, x in enumerate(values)],
+        'interpreted_signal': [[i, x] for i, x in enumerate(interpreted_values)]
+    }), 200
 
 
 if __name__ == "__main__":
