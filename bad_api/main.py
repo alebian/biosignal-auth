@@ -68,17 +68,13 @@ def access_token_required(f):
         return f(client, *args, **kwargs)
     return decorated_function
 
-def levenstein_distance(str1, str2):
-  d = dict()
-  for i in range(len(str1)+1):
-     d[i] = dict()
-     d[i][0] = i
-  for i in range(len(str2)+1):
-     d[0][i] = i
-  for i in range(1, len(str1)+1):
-     for j in range(1, len(str2)+1):
-        d[i][j] = min(d[i][j-1]+1, d[i-1][j]+1, d[i-1][j-1]+(not str1[i-1] == str2[j-1]))
-  return d[len(str1)][len(str2)]
+def hamming_distance(s1, s2):
+    if len(s1) != len(s2):
+        return 0.0
+    return 1 - (sum(el1 != el2 for el1, el2 in zip(s1, s2)) / len(s1))
+
+def signal_difference(s1, s2):
+    return hamming_distance(s1, s2)
 
 ###################################################################################################
 #                                             THREADS                                             #
@@ -187,9 +183,7 @@ def compare_signals(client):
         if (signal_1.device.client_id != client.id) or (signal_2.device.client_id != client.id):
             return '', 403
 
-        return jsonify({
-            'percentage': (1 - levenstein_distance(signal_1.signal, signal_2.signal) / len(signal_1.signal))
-        }), 200 # TODO: calculate difference
+        return jsonify({ 'percentage': signal_difference(signal_1.signal, signal_2.signal) }), 200
     except ModelNotFound as e:
         return '', 404
 

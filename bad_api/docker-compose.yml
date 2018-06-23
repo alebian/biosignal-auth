@@ -1,0 +1,20 @@
+version: '3.3'
+services:
+  web:
+    build: .
+    environment:
+      - POSTGRES_HOST=/cloudsql/proyecto-final-itba:us-central1:biosignal-auth
+      - POSTGRES_DB=biosignal-auth
+      - POSTGRES_USER=biosignal-auth
+      - POSTGRES_PASSWORD=biosignal-auth1234
+      - JSON_KEY_FILE=/app/key.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
+      - GCLOUD_PROJECT_ID=proyecto-final-itba
+      - PORT=8080
+    ports:
+      - 8080:8080
+    networks:
+      - default
+
+networks:
+  default:
