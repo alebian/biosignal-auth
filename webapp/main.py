@@ -119,12 +119,23 @@ def login():
         if r.status_code != 200:
             return jsonify({'error': 'There was a problem with the signals'}), r.status_code
 
-        return jsonify(
-            {
-                'token': encode({ 'email': user.email,
-                'percentage': json.loads(r.text)['percentage'] })
-            }
-        ), 200
+        percentage = json.loads(r.text)['percentage']
+        if percentage >= 0.8:
+            return jsonify(
+                {
+                    'token': encode({ 'email': user.email }),
+                    'percentage': percentage,
+                    'message': 'Logged in successfully!'
+                }
+            ), 200
+        else:
+            return jsonify(
+                {
+                    'percentage': percentage,
+                    'message': 'Signal comparison failed.'
+                }
+            ), 401
+
     except:
         return jsonify({}), 401
 

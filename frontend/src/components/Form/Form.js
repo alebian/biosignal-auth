@@ -13,10 +13,10 @@ class Form extends Component {
     this.state = {
       started: false,
       error: undefined,
-      email: '',
-      password: '',
+      email: undefined,
+      password: undefined,
       deviceOptions: [],
-      signalUUID: '',
+      signalUUID: undefined,
       readerIP: undefined,
     };
   }
@@ -98,7 +98,7 @@ class Form extends Component {
       <div>
         {
           this.state.error || this.props.externalError
-            ? <div className="alert alert-warning" role="alert">{this.state.error || this.props.externalError}</div>
+            ? <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>
             : null
         }
         <div className="horizontal-split">
