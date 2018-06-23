@@ -103,3 +103,6 @@ class EMGShieldController(EMGController):
 
     def build_json_data(self, channels):
         return self.controller.build_data_json(channels)
+
+    def close(self):
+        self.controller.close()
