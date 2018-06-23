@@ -17,6 +17,7 @@ class Form extends Component {
       password: undefined,
       deviceOptions: [],
       signalUUID: undefined,
+      readyToSend: false,
       readerIP: undefined,
     };
   }
@@ -43,7 +44,7 @@ class Form extends Component {
     axios.post(`http://${this.state.readerIP}:5001/api/v1/start`)
       .then(response => {
         if (response.status === 201) {
-          this.setState({started: true, signalUUID: response.data.signalUUID});
+          this.setState({started: true, signalUUID: response.data.signalUUID, readyToSend: false});
         } else {
           this.setState({error: `Unexpected response code ${response.status}`});
         }
@@ -67,6 +68,17 @@ class Form extends Component {
         this.setState({error: 'There was an error'});
         console.log(error);
       });
+  };
+
+  checkIfSignalArrived = () => {
+    this.timer = setInterval(() => {
+      if (!this.state.readyToSend) {
+        axios
+          .get(`${WEBAPP_URL}/signal/${this.state.signalUUID}`)
+          .then(response => this.setState({ readyToSend: true }))
+          .catch(error => console.log(error));
+      }
+    }, 500);
   };
 
   componentDidMount() {
@@ -167,11 +179,19 @@ class Form extends Component {
         </div>
         <br/>
         <button
+          disabled={!this.state.readyToSend}
           className="btn btn-primary"
           onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signal_token: this.state.signalUUID})}
         >
           {this.props.submitText}
         </button>
+        <p className="form-text text-muted">
+          {this.props.belowSubmitText1}
+          {' '}
+          <a className="Link" onClick={this.props.onBelowSubmitClick}>
+            {this.props.belowSubmitText2}
+          </a>
+        </p>
       </div>
     );
   }
@@ -183,8 +203,11 @@ Form.defaultProps = {
 
 Form.propTypes = {
   externalError: PropTypes.string,
-  submitText: PropTypes.string.isRequired,
+  submitText: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
+  belowSubmitText1: PropTypes.string.isRequired,
+  belowSubmitText2: PropTypes.string.isRequired,
+  onBelowSubmitClick: PropTypes.func.isRequired,
 };
 
 export default Form;

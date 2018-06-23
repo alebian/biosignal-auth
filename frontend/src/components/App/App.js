@@ -52,7 +52,7 @@ class App extends Component {
       .catch(error => {
         if (error.response && error.response.status === 401) {
           this.setState({
-            error: `${error.response.data.message} - Signal percentage: %${parseInt(error.response.data.percentage * 100)}`
+            error: `${error.response.data.message} - Signal percentage: %${parseInt(error.response.data.percentage * 100, 10)}`
           });
         }
         console.log(error);
@@ -76,7 +76,7 @@ class App extends Component {
             ?
               <div className="col-sm-8 offset-md-1">
                 <h2 className="LoginMessage">{this.state.loginMessage}</h2>
-                <h2 className="LoginPercentage">Signal percentage: %{parseInt(this.state.loginPercentage * 100)}</h2>
+                <h2 className="LoginPercentage">Signal percentage: %{parseInt(this.state.loginPercentage * 100, 10)}</h2>
                 <h4>Email: {jwt_decode(this.state.token).email}</h4>
               </div>
             : (
@@ -85,12 +85,10 @@ class App extends Component {
                   onSubmit={this.state.registerMenu ? this.handleRegisterSubmit : this.handleLoginSubmit}
                   submitText={this.state.registerMenu ? 'Sign up' : 'Log in'}
                   externalError={this.state.error}
+                  belowSubmitText1={this.state.registerMenu ? 'Already have an account?' : "Don't have an account?"}
+                  belowSubmitText2={this.state.registerMenu ? 'Log in' : 'Sign up'}
+                  onBelowSubmitClick={this.switchRegisterMenu}
                 />
-                {
-                  this.state.registerMenu
-                  ? <p className="form-text text-muted">Already have an account? <a className="Link" onClick={this.switchRegisterMenu}>Log in</a></p>
-                  : <p className="form-text text-muted">Don't have an account? <a className="Link" onClick={this.switchRegisterMenu}>Sign up</a></p>
-                }
               </div>
               )
            }
