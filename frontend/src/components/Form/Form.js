@@ -102,7 +102,7 @@ class Form extends Component {
             : null
         }
         <div className="horizontal-split">
-          <form>
+          <div>
             <div className="form-group">
               <label htmlFor="emailInput">Email</label>
               <input
@@ -153,7 +153,7 @@ class Form extends Component {
                 </div>
               : null
             }
-          </form>
+          </div>
           <div className="chart-container">
             {
               this.state.readerIP && this.state.signalUUID &&
