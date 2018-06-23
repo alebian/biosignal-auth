@@ -6,8 +6,7 @@ import random
 import uuid
 import threading
 
-from emg_driver.emg_shield import EMGShieldController
-from emg_driver.data_collection import DataCollectionThread
+from data_collection_manager import DataCollectionManager
 from mqtt.mqtt import Mqtt
 
 database = {}
@@ -15,6 +14,7 @@ app = Flask(__name__)
 CORS(app)
 
 q = Mqtt()
+manager = DataCollectionManager()
 
 ###################################################################################################
 #                                             HELPERS                                             #
@@ -40,15 +40,16 @@ def token_required(f):
 @app.route("/api/v1/start", methods=['POST'])
 def start():
     token = random_uuid()
-
-    controller = EMGShieldController()
     values = []
-    thread = DataCollectionThread(controller, values)
     database[token] = {
-        'signal': values,
-        'thread': thread
+        'signal': values
     }
-    thread.start()
+    # if manager was not stopped cancel collection#
+    token = manager.stop_collection()
+    if token is not None:
+        del database[token]
+
+    manager.start_collection(values, token)
 
     return jsonify(
         { 'signalUUID': token }
@@ -59,7 +60,7 @@ def start():
 @token_required
 def stop(token):
     try:
-        database[token]['thread'].stop()
+        manager.stop_collection()
         # Sleep?
         signal = database[token]['signal']
         database[token]['signal'] = []
@@ -75,7 +76,7 @@ def stop(token):
 @token_required
 def cancel(token):
     try:
-        database[token]['thread'].stop()
+        manager.stop_collection()
         del database[token]
         return jsonify({}), 200
     except:
