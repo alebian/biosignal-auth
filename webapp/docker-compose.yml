@@ -14,7 +14,7 @@ services:
 
   web:
     build: .
-    command: /bin/sh -c "orator migrate --config /app/config.py -f && python /app/webapp.py"
+    command: /bin/sh -c "orator migrate --config /app/config.py -f && python /app/main.py"
     environment:
       - POSTGRES_PASSWORD=biosignal-auth
       - POSTGRES_USER=biosignal-auth
@@ -22,10 +22,11 @@ services:
       - POSTGRES_HOST=db
       - SECRET_KEY_BASE=f187418a8f99847aa66912dfb87f9c865fdb5a628475a507393c2fed4d810593fd127cbd293a23088c9144e15dc9742ba17e158963f41b0b8fde7a73926d42b9
       - ACCESS_KEY=6xvsTWmeLQ4wYeIyWizk5XfSIUCKlxbFESqgfLiU81c5r2rbarvoZohnoN3T3A4dqMCOo88JggRn52yMmZVq2g==
+      - BAD_API_HOST=https://proyecto-final-itba.appspot.com
     volumes:
       - .:/app
     ports:
-      - 5000:80
+      - 8000:8000
     networks:
       - default
     depends_on:

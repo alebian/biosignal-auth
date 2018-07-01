@@ -71,7 +71,7 @@ def access_token_required(f):
 def hamming_distance(s1, s2):
     if len(s1) != len(s2):
         return 0.0
-    return 1 - (sum(el1 != el2 for el1, el2 in zip(s1, s2)) / len(s1))
+    return 1 - (sum(el1 != el2 for el1, el2 in zip(s1, s2)) / float(len(s1)))
 
 def signal_difference(s1, s2):
     return hamming_distance(s1, s2)
@@ -165,7 +165,7 @@ def get_signal(client, uuid):
     try:
         signal = Signal.where('external_uuid', uuid).first_or_fail()
         if signal.device.client_id != client.id:
-            return '', 403
+            return '', 404
         return '', 204
     except ModelNotFound as e:
         return '', 404
@@ -181,7 +181,7 @@ def compare_signals(client):
         signal_2 = Signal.where('external_uuid', data.get('signal_2_uuid')).first_or_fail()
 
         if (signal_1.device.client_id != client.id) or (signal_2.device.client_id != client.id):
-            return '', 403
+            return '', 404
 
         return jsonify({ 'percentage': signal_difference(signal_1.signal, signal_2.signal) }), 200
     except ModelNotFound as e:

@@ -10,3 +10,4 @@ env
 .vscode
 .env
 key.json
+cloud_sql_proxy
