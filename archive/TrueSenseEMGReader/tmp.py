@@ -7,15 +7,15 @@ import time_features
 
 
 
-TEST_FILES_DIR = './collected_data/alejandro'
+TEST_FILES_DIR = './collected_data/alejandro/flexor_carpi'
 def hand_files():
     for num in range (1, 6):
-        yield json.load(open(os.path.join(TEST_FILES_DIR, 'close_hand_{0}_2017-10-13.json'.format(num))))['adc_values']
+        yield json.load(open(os.path.join(TEST_FILES_DIR, 'close_hand_{0}_2017-10-29.json'.format(num))))['adc_values']
 
 
 def finger_files(finger):
     for num in range (1, 6):
-        yield json.load(open(os.path.join(TEST_FILES_DIR, 'finger_{0}_{1}_2017-10-13.json'.format(finger, num))))['adc_values']
+        yield json.load(open(os.path.join(TEST_FILES_DIR, 'finger_{0}_{1}_2017-10-29.json'.format(finger, num))))['adc_values']
 
 
 colors = ['red', 'green', 'blue', 'yellow', 'pink']
