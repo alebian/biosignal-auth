@@ -90,7 +90,7 @@ def read(token):
     values = database[token]['signal']
     interpreted_values = database[token]['interpreted_signal']
     return jsonify({
-        'signal': [[i, x] for i, x in enumerate(values)],
+        'signal': [[i, x] for i, x in enumerate(values[-2000:])],
         'interpreted_signal': [[i, x] for i, x in enumerate(interpreted_values)]
     }), 200
 
