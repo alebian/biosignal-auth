@@ -2,16 +2,17 @@ from emg_driver.emg_shield import EMGShieldController
 from emg_driver.data_collection import DataCollectionThread
 
 class DataCollectionManager(object):
-    def __init__(self):
+    def __init__(self, settings):
         self.thread = None
         self.controller = None
         self.current_token = None
+        self.settings = settings
 
     def start_collection(self, values, interpreted_values, token):
         self.__delete_thread()
         self.controller = EMGShieldController()
         self.current_token = token
-        self.thread = DataCollectionThread(self.controller, values, interpreted_values)
+        self.thread = DataCollectionThread(self.controller, values, interpreted_values, self.settings)
         self.thread.daemon = True
         self.thread.start()
 

@@ -6,14 +6,14 @@ import numpy as np
 import emg_driver.settings as settings
 
 class DataCollectionThread(threading.Thread):
-    def __init__(self, controller, storage, interpreted_storage):
+    def __init__(self, controller, storage, interpreted_storage, settings):
         super(DataCollectionThread, self).__init__()
         self.controller = controller
         self.get_values = True
         self.storage = storage
         self.interpreted_storage = interpreted_storage
-        self.window_size = settings.WINDOW_SIZE
-        self._encoder = EMGShieldEncoder()
+        self.window_size = settings['window_size']
+        self._encoder = EMGShieldEncoder(settings)
 
     def run(self):
         generator = self._filtered_data()
@@ -50,20 +50,29 @@ class EMGShieldEncoder(object):
         ONE = 0
         DONE = 0
 
-    def __init__(self):
+    def __init__(self, settings):
+        self.settings = settings
         self._prev = None
-        self._spike_threshold = settings.SPIKE_THRESHOLD
-        self._zero_threshold = settings.ZERO_THRESHOLD
-        self._zero_length = settings.ZERO_LENGTH
         self._zero_counter = 0
         self._state = EMGShieldEncoder.EncodingState.STARTING
         self._binary = []
         self._last = None
 
+    @property
+    def _spike_threshold(self):
+        return self.settings['spike_threshold']
+
+    @property
+    def _zero_threshold(self):
+        return self.settings['zero_threshold']
+
+    @property
+    def _zero_length(self):
+        return self.settings['zero_length']
+
     def encode(self, value):
         if self._prev is not None:
             if self._prev < self._spike_threshold and value > self._spike_threshold:
-                print(1)
                 self._state = EMGShieldEncoder.EncodingState.ONE
                 self._zero_counter = 0
                 self._binary.append(1)
@@ -73,7 +82,6 @@ class EMGShieldEncoder(object):
             if value < self._spike_threshold:
                 self._zero_counter += 1
                 if self._zero_counter >= self._zero_length:
-                    print(0)
                     self._binary.append(0)
                     self._zero_counter = 0
                     self._state = EMGShieldEncoder.EncodingState.ZERO

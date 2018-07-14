@@ -6,6 +6,7 @@ import random
 import uuid
 import threading
 
+import emg_driver.settings as settings
 from data_collection_manager import DataCollectionManager
 from mqtt.mqtt import Mqtt
 
@@ -15,11 +16,18 @@ database = {
     'interpreted_signal': None,
 }
 
+settings = {
+    'window_size': settings.WINDOW_SIZE,
+    'spike_threshold': settings.SPIKE_THRESHOLD,
+    'zero_threshold': settings.ZERO_THRESHOLD,
+    'zero_length': settings.ZERO_LENGTH,
+}
+
 app = Flask(__name__)
 CORS(app)
 
 q = Mqtt()
-manager = DataCollectionManager()
+manager = DataCollectionManager(settings)
 
 ###################################################################################################
 #                                             HELPERS                                             #
@@ -109,6 +117,27 @@ def read(token):
         }), 200
     else:
         return jsonify({}), 404
+
+
+@app.route("/api/v1/settings", methods=['GET'])
+def get_settings():
+    return jsonify(settings), 200
+
+
+@app.route("/api/v1/settings", methods=['PUT'])
+def change_settings():
+    data = request.get_json()
+
+    if data['window_size']:
+        settings['window_size'] = data['window_size']
+    if data['spike_threshold']:
+        settings['spike_threshold'] = data['spike_threshold']
+    if data['zero_threshold']:
+        settings['zero_threshold'] = data['zero_threshold']
+    if data['zero_length']:
+        settings['zero_length'] = data['zero_length']
+
+    return jsonify(settings), 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001)
