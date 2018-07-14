@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 
 import './CustomChart.css';
+import SignalService from '../../services/signalService';
 import ReactChartkick, { LineChart } from 'react-chartkick';
 import Chart from 'chart.js';
 
@@ -21,15 +21,15 @@ class CustomChart extends Component {
     if (this.props.url && this.props.token) {
       this.timer = setInterval(() => {
         if (this.props.reading) {
-          axios
-            .get(`${this.props.url}?signalUUID=${this.props.token}`)
+          SignalService.read(this.props.url, this.props.token)
             .then((response) => {
-              this.setState({
-                values: response.data.signal,
-                interpreted_values: response.data.interpreted_signal,
-              });
-            })
-            .catch(error => console.log(error));
+              if (response && response.status === 200) {
+                this.setState({
+                  values: response.data.signal,
+                  interpreted_values: response.data.interpreted_signal,
+                });
+              }
+            });
         }
       }, 500);
     }

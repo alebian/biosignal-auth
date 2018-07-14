@@ -1,0 +1,15 @@
+.SliderContainer {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  height: 75px;
+  margin-right: 10px;
+}
+
+.SliderContainer > p {
+  margin-bottom: 0px;
+}
+
+.SliderContainer > .rangeslider > .rangeslider__fill {
+  background-color: #007bff;
+}

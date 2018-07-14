@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
 import './App.css';
+import ClientService from '../../services/clientService';
 import Form from '../Form/Form'
-
-const WEBAPP_URL = 'http://localhost:8000/api/v1';
 
 class App extends Component {
   constructor(props) {
@@ -20,8 +18,8 @@ class App extends Component {
     };
   }
 
-  handleRegisterSubmit = formInfo => {
-    axios.post(`${WEBAPP_URL}/register`, formInfo)
+  handleRegisterSubmit = (email, password, signalToken) => {
+    ClientService.register(email, password, signalToken)
       .then(response => {
         if (response.status === 201) {
           this.setState({logged: true, token: response.data.token});
@@ -35,8 +33,8 @@ class App extends Component {
       });
   }
 
-  handleLoginSubmit = formInfo => {
-    axios.post(`${WEBAPP_URL}/login`, formInfo)
+  handleLoginSubmit = (email, password, signalToken) => {
+    ClientService.login(email, password, signalToken)
       .then(response => {
         if (response.status === 200) {
           this.setState({
@@ -46,7 +44,7 @@ class App extends Component {
             loginMessage: response.data.message
           });
         } else {
-          this.setState({error: `Unexpected response code ${response.status}`});
+          console.log(`Unexpected response code ${response.status}`);
         }
       })
       .catch(error => {
@@ -54,8 +52,9 @@ class App extends Component {
           this.setState({
             error: `${error.response.data.message} - Signal percentage: %${parseInt(error.response.data.percentage * 100, 10)}`
           });
+        } else {
+          console.log(error);
         }
-        console.log(error);
       });
   }
 

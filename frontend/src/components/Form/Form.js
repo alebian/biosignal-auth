@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 
 import './Form.css';
+import ClientService from '../../services/clientService';
+import SignalService from '../../services/signalService';
 import CustomChart from '../CustomChart/CustomChart';
+import CustomSlider from '../CustomSlider/CustomSlider';
 import RefreshIcon from '../../assets/refresh.png';
-
-const WEBAPP_URL = 'http://localhost:8000/api/v1';
 
 class Form extends Component {
   constructor(props) {
@@ -20,6 +20,12 @@ class Form extends Component {
       signalUUID: undefined,
       readyToSend: false,
       readerIP: undefined,
+      settings: {
+        windowSize: 50,
+        spikeThreshold: 650,
+        zeroThreshold: 250,
+        zeroLength: 500,
+      }
     };
   }
 
@@ -31,6 +37,37 @@ class Form extends Component {
     this.setState({email: event.target.value});
   };
 
+  handleSettingChange = (label, value) => {
+    const newSettings = { ...this.state.settings };
+    newSettings[label] = value;
+    this.setState({
+      settings: newSettings
+    });
+    SignalService.updateSettings(this.state.readerIP, newSettings.windowSize, newSettings.spikeThreshold, newSettings.zeroThreshold, newSettings.zeroLength)
+      .then(response => {
+        if (response.status === 200) {
+          console.log('Settings changed');
+          console.log(response.data);
+        }
+      });
+  }
+
+  handleWindowSizeChange = value => {
+    this.handleSettingChange('windowSize', value);
+  };
+
+  handleSpikeThresholdChange = value => {
+    this.handleSettingChange('spikeThreshold', value);
+  };
+
+  handleZeroThresholdChange = value => {
+    this.handleSettingChange('zeroThreshold', value);
+  };
+
+  handleZeroLengthChange = value => {
+    this.handleSettingChange('zeroLength', value);
+  };
+
   deviceName = device => `${device.name} ${device.ip}`;
 
   handleDeviceChange = event => {
@@ -38,26 +75,34 @@ class Form extends Component {
     const device = this.state.deviceOptions.filter(a => a.name === name)[0];
     this.setState({
       readerIP: device.ip
+    }, () => {
+      SignalService.getSettings(this.state.readerIP)
+      .then(response => {
+        this.setState({
+          settings: {
+            windowSize: response.data.window_size,
+            spikeThreshold: response.data.spike_threshold,
+            zeroThreshold: response.data.zero_threshold,
+            zeroLength: response.data.zero_length,
+          }
+        });
+      });
     });
   };
 
   startReading = () => {
-    axios.post(`http://${this.state.readerIP}:5001/api/v1/start`)
+    SignalService.start(this.state.readerIP)
       .then(response => {
         if (response.status === 201) {
           this.setState({started: true, signalUUID: response.data.signalUUID, readyToSend: false});
         } else {
-          this.setState({error: `Unexpected response code ${response.status}`});
+          console.log(`Unexpected response code ${response.status}`);
         }
-      })
-      .catch(error => {
-        this.setState({error: 'There was an error'});
-        console.log(error);
       });
   };
 
   stopReading = () => {
-    axios.post(`http://${this.state.readerIP}:5001/api/v1/stop`, {signalUUID: this.state.signalUUID})
+    SignalService.stop(this.state.readerIP, this.state.signalUUID)
       .then(response => {
         if (response.status === 200) {
           this.setState({started: false});
@@ -65,35 +110,26 @@ class Form extends Component {
         } else {
           this.setState({error: `Unexpected response code ${response.status}`});
         }
-      })
-      .catch(error => {
-        this.setState({error: 'There was an error'});
-        console.log(error);
       });
   };
 
   checkIfSignalArrived = () => {
     this.timer = setInterval(() => {
       if (!this.state.readyToSend) {
-        axios
-          .get(`${WEBAPP_URL}/signal/${this.state.signalUUID}`)
-          .then(response => this.setState({ readyToSend: true }))
-          .catch(error => console.log(error));
+        ClientService.signalExist(this.state.signalUUID)
+          .then(response => this.setState({ readyToSend: true }));
       }
     }, 500);
   };
 
   refreshItems = () => {
-    axios.get(`${WEBAPP_URL}/devices`)
+    ClientService.devices()
       .then(response => {
         const mapped_response = response.data.map(info => ({ name: info.id, ip: info.ip_address }));
         mapped_response.unshift({name: '', ip: ''});
         this.setState({
           deviceOptions: mapped_response
         });
-      })
-      .catch(error => {
-        console.log(`Error fetching devices: ${error}`);
       });
   };
 
@@ -102,13 +138,7 @@ class Form extends Component {
       started: false,
       signalUUID: '',
     });
-    axios.post(`http://${this.state.readerIP}:5001/api/v1/cancel`, {signalUUID: this.state.signalUUID})
-      .then(response => {
-        console.log('Successfully canceled reading');
-      })
-      .catch(error => {
-        console.log(`Error canceling reading: ${error}`);
-      });
+    SignalService.cancel(this.state.readerIP, this.state.signalUUID);
   };
 
   componentDidMount() {
@@ -176,9 +206,11 @@ class Form extends Component {
                   </div>
                   {
                     this.state.started
-                    ? <div className="StopCancelButtons">
-                        <button className="btn btn-info" onClick={this.stopReading}>Stop</button>
-                        <button className="btn btn-danger" onClick={this.cancelReading}>Cancel</button>
+                    ? <div>
+                        <div className="StopCancelButtons">
+                          <button className="btn btn-info" onClick={this.stopReading}>Stop</button>
+                          <button className="btn btn-danger" onClick={this.cancelReading}>Cancel</button>
+                        </div>
                       </div>
                     : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
                   }
@@ -189,11 +221,19 @@ class Form extends Component {
           <div className="chart-container">
             {
               this.state.readerIP && this.state.signalUUID &&
-              <CustomChart
-                reading={this.state.started}
-                url={`http://${this.state.readerIP}:5001/api/v1/read`}
-                token={this.state.signalUUID}
-              />
+              <div className="ChartWithSliders">
+                <div className="SlidersContainer">
+                  <CustomSlider value={this.state.settings.windowSize} onChange={this.handleWindowSizeChange} text="Window size" max={300} />
+                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Spike Threshold" />
+                  <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Zero threshold" />
+                  <CustomSlider value={this.state.settings.zeroLength} onChange={this.handleZeroLengthChange} text="Zero length" />
+                </div>
+                <CustomChart
+                  reading={this.state.started}
+                  url={this.state.readerIP}
+                  token={this.state.signalUUID}
+                />
+              </div>
             }
           </div>
         </div>
@@ -201,7 +241,7 @@ class Form extends Component {
         <button
           disabled={!this.state.readyToSend}
           className="btn btn-primary"
-          onClick={() => this.props.onSubmit({email: this.state.email, password: this.state.password, signal_token: this.state.signalUUID})}
+          onClick={() => this.props.onSubmit(this.state.email, this.state.password, this.state.signalUUID)}
         >
           {this.props.submitText}
         </button>
