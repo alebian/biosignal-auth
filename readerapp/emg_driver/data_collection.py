@@ -40,7 +40,7 @@ class DataCollectionThread(threading.Thread):
             if i < self.window_size:
                 values[i] = self.controller.read_data().get_channels()[0][0]
                 continue
-            yield np.ptp(values)
+            yield np.max(values)
             values[i % self.window_size] = self.controller.read_data().get_channels()[0][0]
 
 class EMGShieldEncoder(object):
@@ -70,7 +70,7 @@ class EMGShieldEncoder(object):
                 self._last = len(self._binary)
                 self._prev = value
                 return 1
-            if self._state == EMGShieldEncoder.EncodingState.ONE and value < self._zero_threshold:
+            if value < self._spike_threshold:
                 self._zero_counter += 1
                 if self._zero_counter >= self._zero_length:
                     print(0)
@@ -78,6 +78,7 @@ class EMGShieldEncoder(object):
                     self._zero_counter = 0
                     self._state = EMGShieldEncoder.EncodingState.ZERO
                     self._prev = value
+                    self._zero_counter = 0
                     return 0
         self._prev = value
 
