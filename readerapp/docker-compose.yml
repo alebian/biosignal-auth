@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+  app:
+    build: .
+    environment:
+      - GCLOUD_PROJECT_ID=proyecto-final-itba
+      - GCLOUD_REGISTRY_ID=biosignal-auth
+      - GCLOUD_DEVICE_ID=mac-2
+      - CA_CERTS=/app/roots.pem
+      - PRIVATE_KEY_PATH=/app/rsa_private.pem
+      - GCLOUD_REGION=us-central1
+      - GCLOUD_BRIDGE_HOSTNAME=mqtt.googleapis.com
+    ports:
+      - 5001:5001
+    networks:
+      - default
+    volumes:
+      - /dev:/dev
+
+networks:
+  default:

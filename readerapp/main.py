@@ -9,7 +9,12 @@ import threading
 from data_collection_manager import DataCollectionManager
 from mqtt.mqtt import Mqtt
 
-database = {}
+database = {
+    'token': None,
+    'signal': None,
+    'interpreted_signal': None,
+}
+
 app = Flask(__name__)
 CORS(app)
 
@@ -29,31 +34,45 @@ def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = get_uuid_from_request(request)
-        if token not in database.keys():
+        if token != database['token']:
             return jsonify({}), 404
         return f(token, *args, **kwargs)
     return decorated_function
+
+def create_signal(token):
+    _nullify_database()
+    values = []
+    interpreted_values = []
+    database['token'] = token
+    database['signal'] = values
+    database['interpreted_signal'] = interpreted_values
+    manager.start_collection(values, interpreted_values, token)
+
+def read_signal(token):
+    return (database['signal'], database['interpreted_signal'])
+
+def delete_signal(token):
+    signals = _nullify_database()
+    return signals
+
+def _nullify_database():
+    manager.stop_collection()
+    previous_signal = database['signal']
+    previous_interpreted_signal = database['interpreted_signal']
+
+    database['token'] = None
+    database['signal'] = None
+    database['interpreted_signal'] = None
+
+    return (previous_signal, previous_interpreted_signal)
 
 ###################################################################################################
 #                                            ENDPOINTS                                            #
 ###################################################################################################
 @app.route("/api/v1/start", methods=['POST'])
 def start():
-    # if manager was not stopped cancel collection
-    old_token = manager.stop_collection()
-    if old_token is not None:
-        del database[old_token]
-
     new_token = random_uuid()
-    values = []
-    interpreted_values = []
-    database[new_token] = {
-        'signal': values,
-        'interpreted_signal': interpreted_values
-    }
-
-    manager.start_collection(values, interpreted_values, new_token)
-
+    create_signal(new_token)
     return jsonify(
         { 'signalUUID': new_token }
     ), 201
@@ -62,38 +81,34 @@ def start():
 @app.route("/api/v1/stop", methods=['POST'])
 @token_required
 def stop(token):
-    try:
-        manager.stop_collection()
-        signal = database[token]['interpreted_signal']
-        del database[token]
+    signals = delete_signal(token)
 
-        q.publish_event({'uuid': token, 'signal': signal})
+    if signals[1] is not None:
+        q.publish_event({'uuid': token, 'signal': signals[1]})
         return jsonify({ 'signalUUID': token }), 200
-    except:
-        return jsonify({}), 500
+    else:
+        return jsonify({}), 404
+
 
 
 @app.route("/api/v1/cancel", methods=['POST'])
 @token_required
 def cancel(token):
-    try:
-        manager.stop_collection()
-        del database[token]
-        return jsonify({}), 200
-    except:
-        return jsonify({}), 500
+    delete_signal(token)
+    return jsonify({}), 200
 
 
 @app.route("/api/v1/read", methods=['GET'])
 @token_required
 def read(token):
-    values = database[token]['signal']
-    interpreted_values = database[token]['interpreted_signal']
-    return jsonify({
-        'signal': [[i, x] for i, x in enumerate(values[-2000:])],
-        'interpreted_signal': [[i, x] for i, x in enumerate(interpreted_values)]
-    }), 200
-
+    signals = read_signal(token)
+    if signals[0] is not None:
+        return jsonify({
+            'signal': [[i, x] for i, x in enumerate(signals[0][-2000:])],
+            'interpreted_signal': [[i, x] for i, x in enumerate(signals[1])]
+        }), 200
+    else:
+        return jsonify({}), 404
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001)
