@@ -220,19 +220,22 @@ class Form extends Component {
           </div>
           <div className="chart-container">
             {
-              this.state.readerIP && this.state.signalUUID &&
+              this.state.readerIP &&
               <div className="ChartWithSliders">
                 <div className="SlidersContainer">
                   <CustomSlider value={this.state.settings.windowSize} onChange={this.handleWindowSizeChange} text="Window size" max={300} />
-                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Spike Threshold" />
-                  <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Zero threshold" />
+                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Spike Threshold" max={1023} />
+                  {/* <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Zero threshold" max={1023} /> */}
                   <CustomSlider value={this.state.settings.zeroLength} onChange={this.handleZeroLengthChange} text="Zero length" />
                 </div>
-                <CustomChart
-                  reading={this.state.started}
-                  url={this.state.readerIP}
-                  token={this.state.signalUUID}
-                />
+                {
+                  this.state.signalUUID &&
+                  <CustomChart
+                    reading={this.state.started}
+                    url={this.state.readerIP}
+                    token={this.state.signalUUID}
+                  />
+                }
               </div>
             }
           </div>

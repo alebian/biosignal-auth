@@ -1,7 +1,7 @@
 .SliderContainer {
   display: flex;
   flex-direction: column;
-  width: 200px;
+  width: 160px;
   height: 75px;
   margin-right: 10px;
 }
