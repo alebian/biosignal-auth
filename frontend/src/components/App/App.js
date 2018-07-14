@@ -76,7 +76,9 @@ class App extends Component {
             ?
               <div className="col-sm-8 offset-md-1">
                 <h2 className="LoginMessage">{this.state.loginMessage}</h2>
-                <h2 className="LoginPercentage">Signal percentage: %{parseInt(this.state.loginPercentage * 100, 10)}</h2>
+                {
+                  this.state.loginPercentage && <h2 className="LoginPercentage">Signal percentage: %{parseInt(this.state.loginPercentage * 100, 10)}</h2>
+                }
                 <h4>Email: {jwt_decode(this.state.token).email}</h4>
               </div>
             : (

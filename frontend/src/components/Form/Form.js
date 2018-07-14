@@ -95,7 +95,21 @@ class Form extends Component {
       .catch(error => {
         console.log(`Error fetching devices: ${error}`);
       });
-  }
+  };
+
+  cancelReading = () => {
+    this.setState({
+      started: false,
+      signalUUID: '',
+    });
+    axios.post(`http://${this.state.readerIP}:5001/api/v1/cancel`, {signalUUID: this.state.signalUUID})
+      .then(response => {
+        console.log('Successfully canceled reading');
+      })
+      .catch(error => {
+        console.log(`Error canceling reading: ${error}`);
+      });
+  };
 
   componentDidMount() {
     this.refreshItems();
@@ -103,13 +117,7 @@ class Form extends Component {
 
   componentWillUnmount() {
     if (this.state.started && this.state.signalUUID) {
-      axios.post(`http://${this.state.readerIP}:5001/api/v1/cancel`, {signalUUID: this.state.signalUUID})
-      .then(response => {
-        console.log('Successfully canceled reading');
-      })
-      .catch(error => {
-        console.log(`Error canceling reading: ${error}`);
-      });
+      this.cancelReading();
     }
   }
 
@@ -168,7 +176,10 @@ class Form extends Component {
                   </div>
                   {
                     this.state.started
-                    ? <button className="btn btn-info" onClick={this.stopReading}>Stop reading</button>
+                    ? <div className="StopCancelButtons">
+                        <button className="btn btn-info" onClick={this.stopReading}>Stop</button>
+                        <button className="btn btn-danger" onClick={this.cancelReading}>Cancel</button>
+                      </div>
                     : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
                   }
                 </div>

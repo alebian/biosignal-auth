@@ -29,3 +29,13 @@
 .DevicesSelect > select {
   width: 80%;
 }
+
+.StopCancelButtons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.StopCancelButtons > button {
+  width: 45%;
+}
