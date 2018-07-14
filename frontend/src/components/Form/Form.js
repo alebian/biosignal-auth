@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import './Form.css';
 import CustomChart from '../CustomChart/CustomChart';
+import RefreshIcon from '../../assets/refresh.png';
 
 const WEBAPP_URL = 'http://localhost:8000/api/v1';
 
@@ -82,16 +83,22 @@ class Form extends Component {
     }, 500);
   };
 
-  componentDidMount() {
+  refreshItems = () => {
     axios.get(`${WEBAPP_URL}/devices`)
       .then(response => {
+        const mapped_response = response.data.map(info => ({ name: info.id, ip: info.ip_address }));
+        mapped_response.unshift({name: '', ip: ''});
         this.setState({
-          deviceOptions: response.data.map(info => ({ name: info.id, ip: info.ip_address }))
+          deviceOptions: mapped_response
         });
       })
       .catch(error => {
         console.log(`Error fetching devices: ${error}`);
       });
+  }
+
+  componentDidMount() {
+    this.refreshItems();
   }
 
   componentWillUnmount() {
@@ -138,12 +145,13 @@ class Form extends Component {
                 onChange={this.handlePasswordChange}
               />
             </div>
-            <div className="form-group">
+            <div className="form-group DevicesSelect">
               <select className="form-control" onChange={this.handleDeviceChange}>
                 {
                   this.state.deviceOptions.map(deviceInfo => <option key={deviceInfo.name} value={deviceInfo.name}>{this.deviceName(deviceInfo)}</option>)
                 }
               </select>
+              <img src={RefreshIcon} onClick={this.refreshItems} />
             </div>
             {
               this.state.readerIP

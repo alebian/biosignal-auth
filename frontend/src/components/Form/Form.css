@@ -12,3 +12,20 @@
 .horizontal-split > form {
   min-width: 300px;
 }
+
+.DevicesSelect {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.DevicesSelect > img {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.DevicesSelect > select {
+  width: 80%;
+}
