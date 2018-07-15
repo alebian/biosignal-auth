@@ -168,13 +168,12 @@ class Form extends Component {
                 className="form-control"
                 id="emailInput"
                 aria-describedby="emailHelp"
-                placeholder="johndoe@example.com"
                 value={this.state.email}
                 onChange={this.handleEmailChange}
               />
             </div>
             <div className="form-group">
-              <label htmlFor="passwordInput">Password</label>
+              <label htmlFor="passwordInput">Contraseña</label>
               <input
                 type="password"
                 className="form-control"
@@ -195,7 +194,7 @@ class Form extends Component {
               this.state.readerIP
               ? <div>
                   <div className="form-group">
-                    <label htmlFor="tokenInput">Signal Token</label>
+                    <label htmlFor="tokenInput">ID de señal</label>
                     <input
                       type="text"
                       className="form-control"
@@ -208,11 +207,11 @@ class Form extends Component {
                     this.state.started
                     ? <div>
                         <div className="StopCancelButtons">
-                          <button className="btn btn-info" onClick={this.stopReading}>Stop</button>
-                          <button className="btn btn-danger" onClick={this.cancelReading}>Cancel</button>
+                          <button className="btn btn-info" onClick={this.stopReading}>Parar</button>
+                          <button className="btn btn-danger" onClick={this.cancelReading}>Cancelar</button>
                         </div>
                       </div>
-                    : <button className="btn btn-info" onClick={this.startReading}>Start reading</button>
+                    : <button className="btn btn-info" onClick={this.startReading}>Comenzar lectura</button>
                   }
                 </div>
               : null
@@ -223,10 +222,10 @@ class Form extends Component {
               this.state.readerIP &&
               <div className="ChartWithSliders">
                 <div className="SlidersContainer">
-                  <CustomSlider value={this.state.settings.windowSize} onChange={this.handleWindowSizeChange} text="Window size" max={300} />
-                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Spike Threshold" max={1023} />
-                  {/* <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Zero threshold" max={1023} /> */}
-                  <CustomSlider value={this.state.settings.zeroLength} onChange={this.handleZeroLengthChange} text="Zero length" />
+                  <CustomSlider value={this.state.settings.windowSize} onChange={this.handleWindowSizeChange} text="Tamaño ventana" max={300} />
+                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Umbral de pico" max={1023} />
+                  {/* <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Umbral de cero" max={1023} /> */}
+                  <CustomSlider value={this.state.settings.zeroLength} onChange={this.handleZeroLengthChange} text="Longitud de cero" />
                 </div>
                 {
                   this.state.signalUUID &&
@@ -261,7 +260,7 @@ class Form extends Component {
 }
 
 Form.defaultProps = {
-  submitText: 'Submit',
+  submitText: 'Enviar',
 };
 
 Form.propTypes = {

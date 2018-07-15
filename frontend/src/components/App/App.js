@@ -67,7 +67,7 @@ class App extends Component {
       <div className="App container">
         <div className="row">
           <div className="col-sm-6 offset-md-3">
-            <h1>BioSignal auth demo</h1>
+            <h1>BAD Client demo</h1>
           </div>
         </div>
         <div className="row">
@@ -76,7 +76,7 @@ class App extends Component {
               <div className="col-sm-8 offset-md-1">
                 <h2 className="LoginMessage">{this.state.loginMessage}</h2>
                 {
-                  this.state.loginPercentage && <h2 className="LoginPercentage">Signal percentage: %{parseInt(this.state.loginPercentage * 100, 10)}</h2>
+                  this.state.loginPercentage && <h2 className="LoginPercentage">Porcenaje de similitud: %{parseInt(this.state.loginPercentage * 100, 10)}</h2>
                 }
                 <h4>Email: {jwt_decode(this.state.token).email}</h4>
               </div>
@@ -84,10 +84,10 @@ class App extends Component {
               <div className="col-sm-8 offset-md-1">
                 <Form
                   onSubmit={this.state.registerMenu ? this.handleRegisterSubmit : this.handleLoginSubmit}
-                  submitText={this.state.registerMenu ? 'Sign up' : 'Log in'}
+                  submitText={this.state.registerMenu ? 'Registrarse' : 'Inicial sesión'}
                   externalError={this.state.error}
-                  belowSubmitText1={this.state.registerMenu ? 'Already have an account?' : "Don't have an account?"}
-                  belowSubmitText2={this.state.registerMenu ? 'Log in' : 'Sign up'}
+                  belowSubmitText1={this.state.registerMenu ? 'Ya tenés una cuenta?' : "No tenés una cuenta?"}
+                  belowSubmitText2={this.state.registerMenu ? 'Inicial sesión' : 'Registrate'}
                   onBelowSubmitClick={this.switchRegisterMenu}
                 />
               </div>
