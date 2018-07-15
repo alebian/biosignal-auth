@@ -5,7 +5,7 @@ import './Form.css';
 import ClientService from '../../services/clientService';
 import SignalService from '../../services/signalService';
 import CustomChart from '../CustomChart/CustomChart';
-import CustomSlider from '../CustomSlider/CustomSlider';
+import SettingsSliders from '../SettingsSliders/SettingsSliders';
 import RefreshIcon from '../../assets/refresh.png';
 
 class Form extends Component {
@@ -77,16 +77,16 @@ class Form extends Component {
       readerIP: device.ip
     }, () => {
       SignalService.getSettings(this.state.readerIP)
-      .then(response => {
-        this.setState({
-          settings: {
-            windowSize: response.data.window_size,
-            spikeThreshold: response.data.spike_threshold,
-            zeroThreshold: response.data.zero_threshold,
-            zeroLength: response.data.zero_length,
-          }
+        .then(response => {
+          this.setState({
+            settings: {
+              windowSize: response.data.window_size,
+              spikeThreshold: response.data.spike_threshold,
+              zeroThreshold: response.data.zero_threshold,
+              zeroLength: response.data.zero_length,
+            }
+          });
         });
-      });
     });
   };
 
@@ -152,101 +152,83 @@ class Form extends Component {
   }
 
   render() {
+    const readerOptions = this.state.deviceOptions.map(deviceInfo => {
+      return (
+        <option key={deviceInfo.name} value={deviceInfo.name}>
+          {this.deviceName(deviceInfo)}
+        </option>
+      );
+    });
+
     return (
       <div>
         {
-          this.state.error || this.props.externalError
-            ? <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>
-            : null
+          (this.state.error || this.props.externalError) &&
+            <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>
         }
         <div className="horizontal-split">
           <div>
             <div className="form-group">
               <label htmlFor="emailInput">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                id="emailInput"
-                aria-describedby="emailHelp"
-                value={this.state.email}
-                onChange={this.handleEmailChange}
-              />
+              <input type="email" className="form-control" value={this.state.email} onChange={this.handleEmailChange} />
             </div>
+
             <div className="form-group">
               <label htmlFor="passwordInput">Contraseña</label>
-              <input
-                type="password"
-                className="form-control"
-                id="passwordInput"
-                value={this.state.password}
-                onChange={this.handlePasswordChange}
-              />
+              <input type="password" className="form-control" value={this.state.password} onChange={this.handlePasswordChange} />
             </div>
+
             <div className="form-group DevicesSelect">
               <select className="form-control" onChange={this.handleDeviceChange}>
-                {
-                  this.state.deviceOptions.map(deviceInfo => <option key={deviceInfo.name} value={deviceInfo.name}>{this.deviceName(deviceInfo)}</option>)
-                }
+                {readerOptions}
               </select>
               <img src={RefreshIcon} onClick={this.refreshItems} />
             </div>
+
+            <div className="form-group">
+              <label htmlFor="tokenInput">ID de señal</label>
+              <input type="text" className="form-control" id="tokenInput" value={this.state.signalUUID} disabled />
+            </div>
             {
-              this.state.readerIP
+              this.state.started
               ? <div>
-                  <div className="form-group">
-                    <label htmlFor="tokenInput">ID de señal</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="tokenInput"
-                      value={this.state.signalUUID}
-                      disabled
-                    />
+                  <div className="StopCancelButtons">
+                    <button className="btn btn-info" onClick={this.stopReading}>Parar</button>
+                    <button className="btn btn-danger" onClick={this.cancelReading}>Cancelar</button>
                   </div>
-                  {
-                    this.state.started
-                    ? <div>
-                        <div className="StopCancelButtons">
-                          <button className="btn btn-info" onClick={this.stopReading}>Parar</button>
-                          <button className="btn btn-danger" onClick={this.cancelReading}>Cancelar</button>
-                        </div>
-                      </div>
-                    : <button className="btn btn-info" onClick={this.startReading}>Comenzar lectura</button>
-                  }
                 </div>
-              : null
+              : <button className="btn btn-info" disabled={!this.state.readerIP} onClick={this.startReading}>Comenzar lectura</button>
             }
           </div>
+
           <div className="chart-container">
             {
               this.state.readerIP &&
-              <div className="ChartWithSliders">
-                <div className="SlidersContainer">
-                  <CustomSlider value={this.state.settings.windowSize} onChange={this.handleWindowSizeChange} text="Tamaño ventana" max={300} />
-                  <CustomSlider value={this.state.settings.spikeThreshold} onChange={this.handleSpikeThresholdChange} text="Umbral de pico" max={1023} />
-                  {/* <CustomSlider value={this.state.settings.zeroThreshold} onChange={this.handleZeroThresholdChange} text="Umbral de cero" max={1023} /> */}
-                  <CustomSlider value={this.state.settings.zeroLength} onChange={this.handleZeroLengthChange} text="Longitud de cero" />
-                </div>
-                {
-                  this.state.signalUUID &&
-                  <CustomChart
-                    reading={this.state.started}
-                    url={this.state.readerIP}
-                    token={this.state.signalUUID}
+                <div className="ChartWithSliders">
+                  <SettingsSliders
+                    windowSize={this.state.settings.windowSize}
+                    spikeThreshold={this.state.settings.spikeThreshold}
+                    zeroThreshold={this.state.settings.zeroThreshold}
+                    zeroLength={this.state.settings.zeroLength}
+                    onWindowSizeChange={this.handleWindowSizeChange}
+                    onSpikeThresholdChange={this.handleSpikeThresholdChange}
+                    // onZeroThresholdChange={this.handleZeroThresholdChange}
+                    onZeroLengthChange={this.handleZeroLengthChange}
                   />
-                }
-              </div>
+                  {
+                    this.state.signalUUID &&
+                      <CustomChart reading={this.state.started} url={this.state.readerIP} token={this.state.signalUUID} />
+                  }
+                </div>
             }
           </div>
         </div>
         <br/>
-        <button
-          disabled={!this.state.readyToSend}
-          className="btn btn-primary"
-          onClick={() => this.props.onSubmit(this.state.email, this.state.password, this.state.signalUUID)}
-        >
+
+        <button disabled={!this.state.readyToSend} className="btn btn-primary" onClick={() => this.props.onSubmit(this.state.email, this.state.password, this.state.signalUUID)}>
           {this.props.submitText}
         </button>
+
         <p className="form-text text-muted">
           {this.props.belowSubmitText1}
           {' '}
