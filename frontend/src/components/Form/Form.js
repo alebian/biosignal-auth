@@ -94,7 +94,7 @@ class Form extends Component {
     SignalService.start(this.state.readerIP)
       .then(response => {
         if (response.status === 201) {
-          this.setState({started: true, signalUUID: response.data.signalUUID, readyToSend: false});
+          this.setState({started: true, signalUUID: response.data.signalUUID, readyToSend: false}, () => window.scrollTo(0, document.body.scrollHeight));
         } else {
           console.log(`Unexpected response code ${response.status}`);
         }
@@ -161,13 +161,13 @@ class Form extends Component {
     });
 
     return (
-      <div>
-        {
-          (this.state.error || this.props.externalError) &&
-            <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>
-        }
-        <div className="horizontal-split">
-          <div>
+      <div className="col-sm-10 offset-md-1">
+        <div className="flex-column">
+          {
+            (this.state.error || this.props.externalError) &&
+              <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>
+          }
+          <div className="FormInputs">
             <div className="form-group">
               <label htmlFor="emailInput">Email</label>
               <input type="email" className="form-control" value={this.state.email} onChange={this.handleEmailChange} />
@@ -178,33 +178,37 @@ class Form extends Component {
               <input type="password" className="form-control" value={this.state.password} onChange={this.handlePasswordChange} />
             </div>
 
-            <div className="form-group DevicesSelect">
-              <select className="form-control" onChange={this.handleDeviceChange}>
-                {readerOptions}
-              </select>
-              <img src={RefreshIcon} onClick={this.refreshItems} />
+            <div className="form-group">
+              <label htmlFor="passwordInput">Dispositivo</label>
+              <div className="DevicesSelect">
+                <select className="form-control" onChange={this.handleDeviceChange}>
+                  {readerOptions}
+                </select>
+                <img src={RefreshIcon} onClick={this.refreshItems} />
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="tokenInput">ID de señal</label>
               <input type="text" className="form-control" id="tokenInput" value={this.state.signalUUID} disabled />
             </div>
+          </div>
+
+          <div className="FormButtonInputs">
             {
               this.state.started
-              ? <div>
-                  <div className="StopCancelButtons">
-                    <button className="btn btn-info" onClick={this.stopReading}>Parar</button>
-                    <button className="btn btn-danger" onClick={this.cancelReading}>Cancelar</button>
-                  </div>
-                </div>
+              ? [
+                  <button className="btn btn-info" onClick={this.stopReading}>Parar</button>,
+                  <button className="btn btn-danger" onClick={this.cancelReading}>Cancelar</button>
+                ]
               : <button className="btn btn-info" disabled={!this.state.readerIP} onClick={this.startReading}>Comenzar lectura</button>
             }
           </div>
 
-          <div className="chart-container">
+          <div className="FormChartsContainer">
             {
               this.state.readerIP &&
-                <div className="ChartWithSliders">
+                [
                   <SettingsSliders
                     windowSize={this.state.settings.windowSize}
                     spikeThreshold={this.state.settings.spikeThreshold}
@@ -214,28 +218,33 @@ class Form extends Component {
                     onSpikeThresholdChange={this.handleSpikeThresholdChange}
                     // onZeroThresholdChange={this.handleZeroThresholdChange}
                     onZeroLengthChange={this.handleZeroLengthChange}
-                  />
-                  {
-                    this.state.signalUUID &&
-                      <CustomChart reading={this.state.started} url={this.state.readerIP} token={this.state.signalUUID} />
-                  }
-                </div>
+                  />,
+                  <div>
+                    {
+                      this.state.signalUUID &&
+                        <CustomChart reading={this.state.started} url={this.state.readerIP} token={this.state.signalUUID} />
+                    }
+                  </div>
+                ]
             }
           </div>
+          {
+            this.state.signalUUID &&
+              <div className="SubmitContainer">
+                <button disabled={!this.state.readyToSend} className="btn btn-primary" onClick={() => this.props.onSubmit(this.state.email, this.state.password, this.state.signalUUID)}>
+                  {this.props.submitText}
+                </button>
+
+                <p className="form-text text-muted">
+                  {this.props.belowSubmitText1}
+                  {' '}
+                  <a className="Link" onClick={this.props.onBelowSubmitClick}>
+                    {this.props.belowSubmitText2}
+                  </a>
+                </p>
+              </div>
+          }
         </div>
-        <br/>
-
-        <button disabled={!this.state.readyToSend} className="btn btn-primary" onClick={() => this.props.onSubmit(this.state.email, this.state.password, this.state.signalUUID)}>
-          {this.props.submitText}
-        </button>
-
-        <p className="form-text text-muted">
-          {this.props.belowSubmitText1}
-          {' '}
-          <a className="Link" onClick={this.props.onBelowSubmitClick}>
-            {this.props.belowSubmitText2}
-          </a>
-        </p>
       </div>
     );
   }

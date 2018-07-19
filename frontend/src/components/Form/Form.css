@@ -1,16 +1,23 @@
-.horizontal-split {
+.flex {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
 }
 
-.chart-container {
-  width: 500px;
-  height: 300px;
+.flex-column {
+  display: flex;
+  flex-direction: column;
 }
 
-.horizontal-split > form {
-  min-width: 300px;
+.Link {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.FormChartsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .DevicesSelect {
@@ -30,17 +37,41 @@
   width: 80%;
 }
 
-.StopCancelButtons {
+.FormInputs {
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
+  margin-bottom: 20px;
 }
 
-.StopCancelButtons > button {
-  width: 47%;
+.FormInputs > button {
+  margin-right: 20px;
 }
 
-.ChartWithSliders {
+.FormInputs > .form-group {
+  margin-right: 20px;
+}
+
+.FormButtonInputs {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.FormButtonInputs > .form-group {
+  margin-right: 20px;
+}
+
+.FormButtonInputs > button {
+  margin-left: 20px;
+}
+
+.SubmitContainer {
+  align-items: flex-end;
+  align-self: flex-end;
   display: flex;
   flex-direction: column;
 }

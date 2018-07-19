@@ -5,8 +5,8 @@ import 'react-rangeslider/lib/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './components/App/App';
+import Start from './components/Start/Start';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root')); // eslint-disable-line no-undef
+ReactDOM.render(<Start />, document.getElementById('root')); // eslint-disable-line no-undef
 registerServiceWorker();

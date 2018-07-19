@@ -1,3 +1,4 @@
 .ChartsContainer {
-
+  display: flex;
+  flex-direction: row;
 }

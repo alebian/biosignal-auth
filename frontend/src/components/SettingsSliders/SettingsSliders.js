@@ -36,9 +36,6 @@ class SettingsSliders extends PureComponent {
   }
 }
 
-SettingsSliders.defaultProps = {
-};
-
 SettingsSliders.propTypes = {
   windowSize: PropTypes.number.isRequired,
   spikeThreshold: PropTypes.number.isRequired,

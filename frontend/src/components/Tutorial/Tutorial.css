@@ -1,0 +1,66 @@
+.TutorialContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.FirstStep {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.SecondStep {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.Instructions > img {
+  width: 500px;
+  align-self: center;
+}
+
+.InstructionsButtons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.Instructions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ThirdStep {
+  display: flex;
+  flex-direction: column;
+}
+
+.SlidersExplanation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.TutorialButtonsContainer {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  justify-content: space-around;
+  width: 400px;
+  margin-bottom: 50px;
+}
+
+.TutorialCharts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
