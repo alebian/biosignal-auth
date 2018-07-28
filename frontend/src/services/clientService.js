@@ -18,12 +18,12 @@ const service = (() => {
 
     register: (email, password, signalToken) => HTTPService
       .post('/register', {
-        email, password, signalToken,
+        email, password, signal_token: signalToken,
       }),
 
     login: (email, password, signalToken) => HTTPService
       .post('/login', {
-        email, password, signalToken,
+        email, password, signal_token: signalToken,
       }),
   };
 })();

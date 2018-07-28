@@ -1,3 +1,7 @@
 .Header {
   padding: 32px;
 }
+
+.jumbotron {
+  margin-bottom: 0px;
+}

@@ -7,12 +7,12 @@ import './App.css';
 class App extends PureComponent {
   render() {
     return (
-      <div className="col-sm-8 offset-md-1">
-        <h2 className="LoginMessage">{this.props.loginMessage}</h2>
-        {
-          this.props.loginPercentage && <h2 className="LoginPercentage">Porcenaje de similitud: %{parseInt(this.props.loginPercentage * 100, 10)}</h2>
-        }
-        <h4>Email: {jwt_decode(this.props.token).email}</h4>
+      <div className="col-sm-10 offset-md-1">
+        <div className="alert alert-success" role="alert">
+          Logueado correctamente. {this.props.loginPercentage && `Porcentaje de similitud: %${parseInt(this.props.loginPercentage * 100, 10)}`}
+        </div>
+        <h2>Bienvenido {jwt_decode(this.props.token).email}!</h2>
+
       </div>
     );
   }
@@ -20,7 +20,6 @@ class App extends PureComponent {
 
 App.propTypes = {
   loginPercentage: PropTypes.string.isRequired,
-  loginMessage: PropTypes.string.isRequired,
   token: PropTypes.string.isRequired,
 };
 

@@ -162,7 +162,7 @@ class Form extends Component {
 
     return (
       <div className="col-sm-10 offset-md-1">
-        <div className="flex-column">
+        <div className="flex-column FormContainer">
           {
             (this.state.error || this.props.externalError) &&
               <div className="alert alert-danger" role="alert">{this.state.error || this.props.externalError}</div>

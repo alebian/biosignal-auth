@@ -16,7 +16,6 @@ class Start extends Component {
       error: undefined,
       token: undefined,
       loginPercentage: undefined,
-      loginMessage: undefined,
     };
   }
 
@@ -44,8 +43,7 @@ class Start extends Component {
           this.setState({
             logged: true,
             token: response.data.token,
-            loginPercentage: response.data.percentage,
-            loginMessage: response.data.message
+            loginPercentage: response.data.percentage
           });
         } else {
           console.log(`Unexpected response code ${response.status}`);
@@ -73,7 +71,6 @@ class Start extends Component {
         ?
           <App
             loginPercentage={this.state.loginPercentage}
-            loginMessage={this.state.loginMessage}
             token={this.state.token}
           />
         : <Form

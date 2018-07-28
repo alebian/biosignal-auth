@@ -68,76 +68,66 @@ def signal(uuid):
 
 @app.route("/api/v1/register", methods=['POST'])
 def register():
-    try:
-        data = request.get_json()
+    data = request.get_json()
+    r = requests.get(
+        '{}/api/v1/signals/{}'.format(os.environ['BAD_API_HOST'], data['signal_token']),
+        headers={
+            'Authorization': os.environ['ACCESS_KEY'],
+            'Content-Type': 'application/json'
+        }
+    )
+    if r.status_code != 204:
+        return jsonify({'error': 'Hubo un problema con la señal'}), r.status_code
 
-        r = requests.get(
-            '{}/api/v1/signals/{}'.format(os.environ['BAD_API_HOST'], data['signal_token']),
-            headers={
-                'Authorization': os.environ['ACCESS_KEY'],
-                'Content-Type': 'application/json'
-            }
-        )
-        if r.status_code != 204:
-            return jsonify({'error': 'There was a problem with the signal'}), r.status_code
-
-        new_user = User.create(
-            email=data['email'],
-            password_hash=hash_password(data['password']),
-            signal_uuid=data['signal_token']
-        )
-        return jsonify(
-            {'token': encode({'email': new_user.email})}
-        ), 201
-    except:
-        return jsonify(
-            {'error': 'Email already taken.'}
-        ), 400
+    new_user = User.create(
+        email=data['email'],
+        password_hash=hash_password(data['password']),
+        signal_uuid=data['signal_token']
+    )
+    return jsonify(
+        {'token': encode({'email': new_user.email})}
+    ), 201
 
 
 @app.route("/api/v1/login", methods=['POST'])
 def login():
-    try:
-        data = request.get_json()
-        user = User.where('email', data.get('email')).first_or_fail()
+    data = request.get_json()
+    user = User.where('email', data.get('email')).first_or_fail()
 
-        if not check_password(data.get('password'), user.password_hash):
-            return '', 401
+    if not check_password(data.get('password'), user.password_hash):
+        return '', 401
 
-        r = requests.post(
-            '{}/api/v1/signals/compare'.format(os.environ['BAD_API_HOST']),
-            headers={
-                'Authorization': os.environ['ACCESS_KEY'],
-                'Content-Type': 'application/json'
-            },
-            json={
-                'signal_1_uuid': user.signal_uuid,
-                'signal_2_uuid': data.get('signal_token')
+    r = requests.post(
+        '{}/api/v1/signals/compare'.format(os.environ['BAD_API_HOST']),
+        headers={
+            'Authorization': os.environ['ACCESS_KEY'],
+            'Content-Type': 'application/json'
+        },
+        json={
+            'signal_1_uuid': user.signal_uuid,
+            'signal_2_uuid': data.get('signal_token')
+        }
+    )
+
+    if r.status_code != 200:
+        return jsonify({'error': 'Hubo un problema con las señales'}), r.status_code
+
+    percentage = json.loads(r.text)['percentage']
+    if percentage >= 0.8:
+        return jsonify(
+            {
+                'token': encode({ 'email': user.email }),
+                'percentage': percentage,
+                'message': 'Logueado satisfactoriamente!'
             }
-        )
-
-        if r.status_code != 200:
-            return jsonify({'error': 'There was a problem with the signals'}), r.status_code
-
-        percentage = json.loads(r.text)['percentage']
-        if percentage >= 0.8:
-            return jsonify(
-                {
-                    'token': encode({ 'email': user.email }),
-                    'percentage': percentage,
-                    'message': 'Logged in successfully!'
-                }
-            ), 200
-        else:
-            return jsonify(
-                {
-                    'percentage': percentage,
-                    'message': 'Signal comparison failed.'
-                }
-            ), 401
-
-    except:
-        return jsonify({}), 401
+        ), 200
+    else:
+        return jsonify(
+            {
+                'percentage': percentage,
+                'message': 'Fallo la comparación de la señal.'
+            }
+        ), 401
 
 
 if __name__ == "__main__":
