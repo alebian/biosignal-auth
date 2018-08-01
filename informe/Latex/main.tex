@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
 
-\title{Autenticación mediante la utilización de señales EMG}
+\title{BAD: Autenticación mediante la utilización de señales EMG}
 
 \author{
     Bezdjian Alejandro (Leg. Nº 52108) \\
@@ -15,6 +15,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage[normalem]{ulem}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}%
 \usepackage{minted}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
@@ -34,16 +35,17 @@ sorting=ynt
 \clearpage
 
 \section{Abstract}
+
 \paragraph{
-La utilización de un segundo factor en la autenticación aumentan la seguridad de los sistemas, pero es extremadamente importante que no interrumpan la experiencia del usuario. Los métodos más utilizados en la actualidad no proveen una prueba de vida el individuo, es por eso que la utilización de bioseñales podría solucionar ambos problemas con una participación pasiva por parte del usuario.
+La autenticación multifactor combina credenciales de distinto tipo para crear una defensa por capas y prevenir accesos no autorizados, esto aumenta la seguridad pero disminuye la experiencia del usuario. En este trabajo proponemos un sistema que provee autenticación multifactor utilizando ``algo que tengo'' y ``algo que soy'', mediante un dispositivo de autenticación biométrica. Este sistema está orientado a proveer un servicio a empresas que ya utilicen la autenticación mediante un secreto compartido como una contraseña y busquen aumentar su seguridad.
 }
 \paragraph{
-Si bien no se pueden detectar características intrínsecas de los individuos usando la electromiografía, es posible crear un esquema de autenticación que la utilice y provea una prueba de vida del usuario.
+Para realizar esto llevamos a cabo una comparación de distintos dispositivos biométricos de bajo costo para el desarrollo de aplicaciones de IoT. Si bien estos dispositivos no poseen la resolución adecuada para extraer características que permitan distinguir correctamente a los usuarios, se pudo implementar un esquema de autenticación mediante señales de electromiografía generadas con participación activa de los mismos.
 }
 
 \section{Introducción}
 \paragraph{
-En la actualidad, internet se ha vuelto una herramienta fundamental en casi todos los aspectos del ser ser humano. Hace ya mucho tiempo que dejó de ser tan solo un método de comunicación conveniente. Por ejemplo, las personas ahorran mucho tiempo y dinero comprando en sitios e-commerce o haciendo trámites online. También, se entretienen con juegos, plataformas de música y video y con las redes sociales. Sin embargo, la mayoría de sitios web siguen requiriendo a los usuarios que se registren utilizando un nombre de usuario y una contraseña, un método que sigue sobreviviendo desde el comienzo de internet. El uso de una contraseña no es una mala solución en si misma y existen aspectos que hacen reducir la efectividad de las mismas.
+En la actualidad, internet se ha vuelto una herramienta fundamental en casi todos los aspectos del ser ser humano. Hace ya mucho tiempo que dejó de ser tan solo un método de comunicación conveniente. Por ejemplo, las personas ahorran mucho tiempo y dinero comprando en sitios e-commerce o haciendo trámites online. También, se entretienen con juegos, plataformas de música y video y con las redes sociales. Sin embargo, la mayoría de sitios web siguen requiriendo a los usuarios que se registren utilizando un nombre de usuario y una contraseña, un método que sigue sobreviviendo desde el comienzo de internet.
 }
 \paragraph{
  No todos los sitios de internet toman los recaudos necesarios en materia de seguridad para almacenar las contraseñas o para no permitir que atacantes intenten adivinar las mismas. Esto puede suceder por desconocimiento o porque los sistemas quedan desactualizados y sin mantenimiento o por vulnerabilidades de seguridad, entre otros.
@@ -55,20 +57,23 @@ Otro de los problemas los usuarios por lo general suelen olvidar las contraseña
 Para empeorar aún más la situación, los usuarios suelen repetir contraseñas entre los diferentes sitios para no olvidarlas, lo que hace que exista una fuga de información indirecta cuando un sitio web es hackeado. Actualmente se sabe que más de cinco mil millones de contraseñas fueron adquiridas por hackeos públicamente conocidos \cite{haveibeenpwned}. Mejorar la seguridad en internet y proteger la información de los usuarios es sumamente importante y para eso es necesario atacar los dos problemas mencionados: los sistemas y la experiencia de usuario.
 }
 \paragraph{
-El cuerpo humano posee una actividad eléctrica natural que puede utilizarse para transmitir información a un dispositivo electrónico. Con este objetivo, son de particular importancia la electromiografía y la electroencefalografía. En el pasado estas señales eran utilizadas únicamente para propósitos médicos, pero en los últimos años con el surgimiento de BCI aumentó la disponibilidad de dispositivos de uso comercial. A la vez con la surgimiento de dispositivos \textit{wearables} aparecieron nuevas posibilidades para la aplicación de sensores biométricos. Las aplicaciones de ésta tecnología son muy variadas, van desde control de prótesis robóticas hasta otras más tradicionales como el registro de actividad cerebral durante el sueño o meditación.
+El cuerpo humano posee una actividad eléctrica natural que puede utilizarse para transmitir información a un dispositivo electrónico. Con este objetivo, son de particular importancia la electromiografía y la electroencefalografía. En el pasado estas señales eran utilizadas únicamente para propósitos médicos, pero en los últimos años con el surgimiento de las Brain Computer Interfaces (BCI) aumentó la disponibilidad de dispositivos de uso comercial. A la vez con la surgimiento de dispositivos \textit{wearables} aparecieron nuevas posibilidades para la aplicación de sensores biométricos. Las aplicaciones de ésta tecnología son muy variadas, van desde control de prótesis robóticas \cite{veer2015} hasta otras más tradicionales como el registro de actividad cerebral durante el sueño o meditación \cite{kaur2015}.
 }
 \paragraph{
-Estas señales que se pueden tomar de las personas tienen varias características que son atractivas para la seguridad informática, por ejemplo que se pueden tomar de forma no invasiva y que otorgan una prueba de vida de las personas. Además, si se logran los avances tecnológicos necesarios podría suceder que los usuarios no necesiten realizar una acción extra para usar estas señales en la autenticación de un sistema, ya que podrían obtenerse a través de dispositivos que usa habitualmente de forma automática, logrando una mejor experiencia de usuario.
+Uno de los aspectos más interesantes de este tipo de señales es que, si se logran los avances tecnológicos necesarios, podría suceder que los usuarios no necesiten realizar una acción extra para usar estas señales en la autenticación de un sistema, ya que podrían obtenerse a través de dispositivos que usa habitualmente de forma automática, logrando una mejor experiencia de usuario.
 }
-\section{Justificacion del trabajo}
+\section{Justificación del trabajo}
 \paragraph{
 En este trabajo se evaluará la factibilidad de la utilización de señales EMG o EEG para utilizar como método de autenticación o segundo factor. Es por eso que se investigará si existe información intrínseca de los individuos en dichas señales y de qué manera se pueden implementar para que utilizarlo en sistemas existentes sea lo más simple posible.
 }
 \paragraph{
-Se pensó en la utilización de este tipo de señales debido a que podrían obtenerse mediante métodos no intrusivos y con una participación pasiva de los individuos, lo que aumentaría la aceptación psicológica de los mismos.
+Este tipo de señales tienen las ventajas que se obtienen mediante métodos no invasivos y con una participación tanto pasiva como activa de los individuos, lo que ofrece flexibilidad para aumentaría la aceptación psicológica de los mismos.
 }
 \paragraph{
-Como primera aproximación se intentará detectar features característicos de los individuos en dichas señales, lo que permitiría la identificación inequívoca de las personas. En caso de no poder encontrar características únicas de los individuos en las señales, se intentará implementar un esquema de autenticación que utilice las señales como un segundo factor o contraseña para agregar seguridad a un sistema.
+En primer lugar evaluamos distintos dispositivos de EMG y EEG disponibles para su uso en un sistema de autenticación. Esto implicó implementar una interfaz para comunicarse con los mismos y poder determinar las ventajas y desventajas de cada uno. A partir de estos datos tomamos la decisión de quedarnos con uno para diseñar una implementación testigo en la que se pueda observar la factibilidad del sistema, finalmente presentamos una API para dar un uso comercial al mismo
+}
+\paragraph{
+Nuestro trabajo de divide en tres partes: primero se presentan los distintos tipos de señales biométricas disponibles y el estado del arte en su uso como factor de autenticación. Luego se comparan distintos dispositivos biométricos con el fin de decidir cual utilizar para una implementación y habiendo elegido uno se detalla el procesamiento de la señal obtenida. Para finalizar se presenta una implementación de una API genérica para realizar autenticación mediante una señal biométrica con un fin comercial.
 }
 
 \section{Estado del arte}
@@ -86,22 +91,15 @@ Para este proyecto se consideraron únicamente dispositivos de EMG superficial.
 
 \subsection{Electroencefalografía (EEG)}
 \paragraph{
-EEG es otra técnica de electro diagnóstico médico que sirve para grabar la actividad eléctrica del cerebro. Así como con EMG puede o no ser invasiva dependiendo del nivel de detalle requerido. Las técnicas no invasivas son más frecuentes, ya que las invasivas requieren perforaciones en el cráneo por lo que son utilizadas en paciente con condiciones severas. Existen aplicaciones comerciales de EEG superficial para el monitoreo del sueño y meditación como el Muse Headband \ref{fig:muse}.
+EEG es otra técnica de electro diagnóstico médico que sirve para grabar la actividad eléctrica del cerebro. Así como con EMG puede o no ser invasiva dependiendo del nivel de detalle requerido. Las técnicas no invasivas son más frecuentes, ya que las invasivas requieren perforaciones en el cráneo por lo que son utilizadas en pacientes con condiciones severas. Existen aplicaciones comerciales de EEG superficial para el monitoreo del sueño y meditación como el Muse Headband [Figura \ref{fig:muse}].
 }
 \paragraph{
-En general, debido a que las mediciones se realizan con electrodos en el cuero cabelludo, difícilmente se puedan obtener buenas mediciones de la actividad debajo de la corteza cerebral y son fuertemente dependientes de la ubicación de los electrodos. Además, si bien es posible detectar las áreas del cerebro que se encuentran en actividad, es muy difícil asociar que acciones específicas producen las señales.
+En general, debido a que las mediciones se realizan con electrodos en el cuero cabelludo, difícilmente se puedan obtener buenas mediciones de la actividad directa del Sistema Nervioso Central y son fuertemente dependientes de la ubicación de los electrodos. Además, si bien es posible detectar de manera general las áreas del cerebro que se encuentran en actividad, la localización espacial es bastante pobre y es muy difícil asociar que acciones específicas producen las señales.
 }
 \paragraph{
-Otro aspecto importante es que los dispositivos con mejor resolución, además de ser muy costosos, atentan contra la usabilidad de los usuarios para una posible utilización comercial, debido a que lleva mucho tiempo colocarse los electrodos en la cabeza de forma correcta. Es por esto que en dispositivos como el Muse, que es muy simple y fácil de colocar, se pierde resolución y calidad de la señal.
+Otro aspecto importante es que los dispositivos con mejor resolución, además de ser muy costosos, atentan contra la usabilidad en una posible implementación comercial, debido a que lleva mucho tiempo colocarse los electrodos en la cabeza de forma correcta. Es por esto que en dispositivos como el Muse, que es muy simple y fácil de colocar, se pierde resolución y calidad de la señal.
 }
 
-\subsection{Muse Headband}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=2in]{museheadband.jpg}%
-    \caption{Imagen de un Muse headband}
-    \label{fig:muse}
-\end{figure}
 
 \subsection{Sistema de Autenticación por Biometría}
 \paragraph{
@@ -120,12 +118,21 @@ Utilizar más de una vez una misma fuente, por ejemplo requerir dos contraseñas
 La fuente más utilizada y simple de implementar es aquella que utiliza un secreto compartido (usuario y contraseña). Históricamente agregar una fuente extra resultaba muy costoso tanto en lo económico como en la experiencia del usuario. En los últimos años se desarrollaron varias técnicas y tecnologías que permitieron disminuir estos costos y sumado a que existe una mayor concientización por parte de los usuarios, se comenzaron a utilizar las otras fuentes de identificación como un segundo factor. Entre los ejemplos más comunes se encuentran: lector de huella en los celulares, códigos enviados por SMS o email y aplicaciones que generan números pseudo aleatorios en los celulares. Agregar fuentes siempre atenta contra la experiencia de usuario, ya que requieren mayor participación del mismo y hacen que acceder al sistema tarde más y requiera más pasos.
 }
 \paragraph{
-Si bien la autenticación con estos sistemas tiene un alto grado de efectividad, carecen de una prueba de vida del usuario, es por eso que se intensificó la investigación en los métodos de autenticación biométricos, que utilizan bioseñales como forma de identificación. Un descubrimiento reciente demostró que la señal proveniente de los latidos del corazón es única en los individuos, lo que resulta de mucho valor en la industria y por ejemplo Samsung ya aplicó una patente en Estados Unidos para el uso de la señal del corazón (ECG) para el desbloqueo de sus relojes inteligentes \cite{samsung2016}.
+Un descubrimiento reciente demostró que la señal proveniente de los latidos del corazón es única en los individuos, lo que resulta de mucho valor en la industria y por ejemplo Samsung ya aplicó una patente en Estados Unidos para el uso de la señal del corazón (ECG) para el desbloqueo de sus relojes inteligentes \cite{samsung2016}.
 }
 \paragraph{
 La autenticación biométrica se basa en la autenticación de los usuarios en función de sus características físicas y consiste en la aplicación de técnicas matemáticas y estadísticas sobre los rasgos físicos de la persona con el objetivo de verificar su identidad. Básicamente, en un primer registro de alta, se “escanea” la característica biométrica que es analógica, mediante un algoritmo se digitaliza, se asocia a la identidad personal y se guarda de forma cifrada. Cuando se autentica el individuo, se compara la información recogida con el repositorio de características biométricas digitalizadas y se determina la identidad. \cite{esparza2017}
 }
-\section{Captura de Señales Biométricas}
+\paragraph{
+En los últimos años se publicaron varios papers de autenticación por biometría como \emph{A Study on EMG-based Biometrics} \cite{jinsu2017} que propone un esquema de autenticación que utiliza señales de EMG obtenidas realizando tres movimientos: cerrar el puño, rotar la muñeca y levantar la mano. También existen esquemas que utilizan otro tipo de señales como \emph{A novel biometric authentication approach using ECG and EMG signals} \cite{nbfnf2015} que esta basado en señales ECG pero también agrega una componente de EMG. En estos papers se utilizan dispositivos de aplicación médica, los cuales proveen una mejor calidad de señal, o trabajan sobre bases de datos médicas cuyos datos fueron obtenidos con dispositivos de este tipo. El esquema propuesto en este trabajo utiliza dispositivos no pensados para uso médico lo que implica un menor costo pero a la vez una peor calidad de señal.
+}
+
+\section{Dispositivos para Captura de Señales Biométricas}
+
+\paragraph{
+En esta sección evaluamos los dispositivos: TrueSense, Olimex EMG/EEG Shield y Muse Headband, tomando en consideración las señales que permiten obtener y su facilidad de uso y desarrollo.
+}
+
 \subsection{TrueSense}
 \paragraph{
 El TrueSense es un dispositivo para leer señales EMG producido por Open Path Innovations, el cual se consta de un sensor y un controlador. El sensor posee una batería y le envía la señal al controlador de forma inalámbrica, lo que lo hace más cómodo y práctico de utilizar que otras alternativas, es por eso es que fue nuestra primera opción para comenzar el armado del prototipo.
@@ -188,7 +195,7 @@ Para clasificar los movimientos, se extrajeron las features para series de tiemp
 \end{center}
 
 \paragraph{
-En las figuras \ref{fig:feature1}, \ref{fig:feature2} y \ref{fig:feature3} se pueden observar los resultados obtenidos de 20 muestras de los movimientos de cerrar dedos individualmente para distintas features.
+En las [Figura \ref{fig:feature1}], [Figura \ref{fig:feature2}] y [Figura \ref{fig:feature3}] se pueden observar los resultados obtenidos de 20 muestras de los movimientos de cerrar dedos individualmente para distintas features.
 }
 
 \begin{center}
@@ -244,6 +251,24 @@ $WL = \sum_{n=1}^{N-1} \abs{X_{n + 1} - X_n}$
 Para probar, se utilizó el set completo de cada dedo y se probó contra los distintos sets, lo que arrojó los siguientes resultados (sólo se muestra la feature “mean absolute value” porque fue la que arrojó los mayores porcentajes de clasificación):
 }
 
+\begin{center}
+\begin{tabular}{ |c|c|c|c|c|c| }
+\hline
+    \textbf{Entrenamiento / Prueba} & \textbf{Finger 0} & \textbf{Finger 1} & \textbf{Finger 2} & \textbf{Finger 3} & \textbf{Finger 4} \\
+\hline
+    \textbf{Finger 0} & \textbf{34.22\%} & 30.17\% & 11.51\% & 15.86\% & 34.07\% \\
+\hline
+    \textbf{Finger 1} & 40.12\% & \textbf{35.18\%} & 12.81\% & 18.08\% & 39.64\% \\
+\hline
+    \textbf{Finger 2} & 81.25\% & 70.50\% & \textbf{34.99\%} & 47.88\% & 71.07\% \\
+\hline
+    \textbf{Finger 3} & 52.73\% & 47.78\% & 31.15\% & \textbf{36.22\%} & 50.67\% \\
+\hline
+    \textbf{Finger 4} & 22.22\% & 19.91\% & 1.65\% & 4.39\% & \textbf{26.08\%} \\
+\hline
+\end{tabular}
+\end{center}
+
 \paragraph{
 Idealmente, para poder clasificar los movimientos, lo que se debería ver en la tabla es que los valores de la diagonal esten cerca del 100\% y el resto de los valores esten lejos de un 100\%, pero como podemos ver los resultados no fueron así y la hipótesis de que no se puede clasificar correctamente se confirma.
 }
@@ -261,7 +286,7 @@ Uno de los objetivos que debe tener un esquema de autenticación para conseguir 
 \end{figure}
 
 \paragraph{
-El Olimex EMG/EEG Shield [\ref{fig:olimexshield}] es una placa diseñada por la empresa Olimex que permite leer señales EMG o EEG desde un arduino. Para hacer esto se deben conectar los electrodos deseados a la placa y la placa al arduino. La placa se encarga de convertir la señal diferencial analógica (bioseñal) de los canales de entrada positivo y negativo, en un stream de datos como salida. Este stream puede ser leído por el arduino mediante los pines analógicos. El arduino se encarga de discretizar la señal y escribirla en el puerto serie.
+El Olimex EMG/EEG Shield [Figura \ref{fig:olimexshield}] es una placa diseñada por la empresa Olimex que permite leer señales EMG o EEG desde un Arduino. Para hacer esto se deben conectar los electrodos deseados a la placa y la placa al Arduino. La placa se encarga de convertir la señal diferencial analógica (bioseñal) de los canales de entrada positivo y negativo, en un stream de datos como salida. Este stream puede ser leído por el Arduino mediante los pines analógicos. El Arduino se encarga de discretizar la señal y escribirla en el puerto serie.
 }
 
 \paragraph{
@@ -274,13 +299,16 @@ Las ventajas de este dispositivo frente al TrueSense son:
   \item La lectura por el puerto serie es mucho más simple.
   \item Se puede definir la frecuencia de muestreo.
 \end{enumerate}
-\paragraph{
-Con estas ventajas en mente, se decidió utilizar el Olimex para cualquier prototipo a presentar.
-}
 
 \subsection{Muse headband}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=2in]{museheadband.jpg}%
+    \caption{Imagen de un Muse headband}
+    \label{fig:muse}
+\end{figure}
 \paragraph{
-Este es un dispositivo pensado para el monitoreo señales de EEG durante la meditación \ref{fig:muse}. El dispositivo se conecta mediante Bluetooth LE (4.0) con un teléfono que tenga la aplicación de Muse, desde esta se pueden ver distintas métricas de las señales.
+Este es un dispositivo pensado para el monitoreo señales de EEG durante la meditación [Figura \ref{fig:muse}]. El dispositivo se conecta mediante Bluetooth LE (4.0) con un teléfono que tenga la aplicación de Muse, desde esta se pueden ver distintas métricas de las señales.
 }
 \paragraph{
 También se encuentra disponible para descargar un SDK para iOS, Android y Windows 10 y del sitio de Muse también se puede descargar un proyecto de Visual Studio 2015 con una aplicación para visualizar la señal.
@@ -289,12 +317,17 @@ También se encuentra disponible para descargar un SDK para iOS, Android y Windo
 El Muse presentaba una serie de ventajas como ser fácil de colocar y una buen duración de la batería. Pero como desventajas tiene que, debido a que fue diseñado para ser utilizado desde un dispositivo móvil, la comunicación desde una computadora es dificultosa. Las aplicaciones para comunicarse con MacOS y Linux quedaron obsoletas con el Muse 2016 que fue el provisto, únicamente soportando Windows 10. A su vez también es necesario que la computadora cuente con un conector Bluetooth LE.
 }
 
+\subsection{Conclusión}
+\paragraph{
+De los dispositivos disponibles decidimos quedarnos con el Olimex Shield ya que el mismo supera ampliamente al TrueSense tanto en la calidad de la señal como en la facilidad de aplicación de los electrodos. El Muse presentaba una alternativa interesante por ser ya un producto de uso comercial, lo que se puede observar en su apariencia y facilidad de uso, pero fue descartado debido a la dificultad para conectarse desde otro dispositivo más allá de un smartphone.
+}
+
 \section{Análisis de la señal EMG}
 \paragraph{
 Como se mencionó anteriormente, debido a la dificultad de obtener las señales EMG del dispositivo TrueSense y las señales EEG del Muse, en esta sección se describirá como fue el análisis de las señales obtenidas por el Olimex, que son las que fueron utilizadas.
 }
 \paragraph{
-El análisis de la señal consiste en dos partes, el preprocesamiento y la codificación. La señal cruda que proviene del dispositivo consiste en la diferencia de potencial entre los electrodos derecho e izquierdo. Con los electrodos colocados sobre un músculo en particular, la misma refleja la activación del mismo. Esta activación se puede visualizar como picos en el gráfico de la señal.
+El análisis de la señal consiste en dos partes, el preprocesamiento y la codificación. La señal cruda que proviene del dispositivo consiste en la diferencia de potencial entre los electrodos derecho e izquierdo. Con los electrodos colocados sobre un músculo en particular, los picos en la señal reflejan la activación del mismo.
 }
 \paragraph{
 El en Olimex Shield, el rango de valores de la señal es de 0 a 5 volts mapeado a valores enteros de 0 a 1023 y la frecuencia de muestreo es de 256 Hz.
@@ -322,7 +355,7 @@ $f(s, i, n) = max(\big\{ s(x) : x = i - n, ..., i\big\})$
 %\end{center}
 
 \paragraph{
-Como se puede ver en la figura [\ref{fig:filtered}], el resultado visible de este filtro es que se logra una especie de señal "cuadrada", ya que nos quedamos con el máximo valor de cada una de las ventanas.
+El resultado visible de este filtro es que se logra una especie de señal "cuadrada", ya que nos quedamos con el máximo valor de cada una de las ventanas [Figura \ref{fig:filtered}].
 }
 
 \begin{figure}[ht]
@@ -342,7 +375,7 @@ Como se puede ver en la figura [\ref{fig:filtered}], el resultado visible de est
 \end{figure}
 
 \paragraph{
-La segunda etapa de análisis consiste en transformar la señal a un código binario, siendo 1 un pico de activación y 0 el reposo. Para esto se debe elegir un valor de umbral, el cual hace que todos los valores por debajo del mismo se transformen en 0 y todos los valores superiores se transformen en 1, de esta manera detectar un cambio se vuelve muy simple y podemos generar el código binario. Se puede ver un ejemplo en la figura [\ref{fig:umbralized}].
+La segunda etapa de análisis consiste en transformar la señal a un código binario, siendo 1 un pico de activación y 0 el reposo. Para esto se debe elegir un valor de umbral, el cual hace que todos los valores por debajo del mismo se transformen en 0 y todos los valores superiores se transformen en 1, de esta manera detectar un cambio se vuelve muy simple y podemos generar el código binario [Figura \ref{fig:umbralized}].
 }
 \subsection{Comparación de las señales}
 \paragraph{
@@ -368,10 +401,13 @@ D(L_1, L_2, B)
 
 \section{BAD API}
 \paragraph{
-Luego de la investigación realizada, se decidió implementar un servicio SaaS de autenticación que provea una forma de agregar una autenticación de segundo factor utilizando señales EMG. A este servicio lo llamamos BAD API (biosignal authentication device) y la idea es que sea un servicio SaaS que puedan utilizar clientes en sus aplicaciones. Los clientes de este servicio no son los usuarios finales de un sistema, sino que son, en principio, los proveedores de servicios web (por ejemplo el home banking de un banco) que deseen agregar este tipo de segundo factor para sus usuarios.
+Agregar un multifactor que utilice bioseñales a un sitio existente no es algo simple de hacer, por eso es una buena idea utilizar un servicio externo que permita hacerlo de la forma más simple posible.
 }
 \paragraph{
-El servicio BAD API proveerá a lossus clientes de los dispositivos que leen las señales EMG y cuenta con un servidor en la nube que los mismos pueden utilizar para conectarse. Para esta conexión es necesario un access key que se proveerá a los clientes junto con los dispositivos.
+Luego de la investigación realizada, se decidió implementar un esquema testigo completo de autenticación por segundo factor basado en señales de EMG.  La solución incluye un servicio SaaS que provea una forma de agregar una autenticación reutilizable desde cualquier tipo de aplicación externa. A este servicio lo llamamos BAD API (Biosignal Authentication Device) y la idea es que sea un servicio Cloud Platform As A Service que puedan utilizar clientes en sus aplicaciones. Los clientes de este servicio no son los usuarios finales de un sistema, sino que son, en principio, los proveedores de servicios web (por ejemplo el home banking de un banco) que deseen agregar este tipo de segundo factor para sus usuarios.
+}
+\paragraph{
+El servicio BAD API proveerá a los clientes de los dispositivos que leen las señales EMG y cuenta con un servidor en la nube que los mismos pueden utilizar para conectarse. Para esta conexión es necesario un access key que se proveerá a los clientes junto con los dispositivos.
 }
 \paragraph{
 En los siguientes apartados se explicarán todos los detalles y fundamentos técnicos del servicio.
@@ -379,7 +415,7 @@ En los siguientes apartados se explicarán todos los detalles y fundamentos téc
 
 \subsection{Arquitectura}
 \paragraph{
-El servicio cloud utilizado para desplegar la BAD API y para comunicar de forma segura los dispositivos fue Google Cloud Platform, mas precisamente sus servicios IoT Core, App engine y SQL.
+El servicio cloud utilizado para desplegar la BAD API y para comunicar de forma segura los dispositivos fue Google Cloud Platform, mas precisamente sus servicios IoT Core \cite{GoogleIotCore}, App engine \cite{GoogleAppEngine} y Cloud SQL \cite{GoogleCloudSQL}.
 }
 \paragraph{
 IoT Core es un servicio que permite administrar dispositivos IoT y que los mismos se comuniquen de forma segura. Cada dispositivo debe tener un par de claves pública y privada y debe estar registrado en la consola web que provee Google con su clave pública. Los dispositivos que no utilizan una clave registrada tienen el acceso denegado.
@@ -458,7 +494,7 @@ El protocolo de comunicación principal elegido fue HTTP y HTTPS, lo que facilit
 \end{figure}
 
 \paragraph{
-En principio, como se muestra en los diagramas \ref{fig:ipexchange} y \ref{fig:authschema}, la aplicación cliente le muestra al usuario, las opciones de dispositivos que tiene disponibles para él. Dado que el cliente tiene toda la información de sus dispositivos, este puede mostrar a sus usuarios la información inteligentemente (podría mostrarle sólo los dispositivos cercanos).
+En principio, la aplicación cliente le muestra al usuario, las opciones de dispositivos que tiene disponibles para él [Figura \ref{fig:ipexchange}]. Dado que el cliente tiene toda la información de sus dispositivos, este puede mostrar a sus usuarios la información inteligentemente (podría mostrarle sólo los dispositivos cercanos).
 }
 \paragraph{
 El usuario elige uno de los dispositivos disponibles y puede pedirle que comience a leer la señal, obteniendo un UUID que la representará en la BAD API.
@@ -467,7 +503,7 @@ El usuario elige uno de los dispositivos disponibles y puede pedirle que comienc
 Cuando el dispositivo recibe la señal de que pare de leer la señal, éste pública la misma en el canal MQTT provisto por el servicio cloud, el cual será recibido por la BAD API.
 }
 \paragraph{
-Una vez que la señal fue recibida por la BAD API, el usuario le envía al servicio cliente un request para registrarse o loguearse.
+Una vez que la señal fue recibida por la BAD API, el usuario le envía al servicio cliente un request para registrarse o loguearse [Figura \ref{fig:authschema}].
 }
 \paragraph{
 Es aqui el unico punto en donde difieren ambos flujos:
@@ -742,7 +778,7 @@ Códigos de respuesta posibles
 En esta sección se describirán las posibles amenazas y los aspectos de seguridad relevantes en el sistema, así también como fueron mitigados algunas de las amenazas y cómo se pueden mitigar las demás.
 }
 \paragraph{
-Como se observa en la figura [\ref{fig:generaldiagram}], hay cuatro canales de comunicación que manejan y/o almacenan información sensible.
+Hay cuatro canales de comunicación que manejan y/o almacenan información sensible [Figura \ref{fig:generaldiagram}].
 }
 
 \subsection{Comunicación entre el dispositivo y la computadora del usuario}
@@ -772,7 +808,7 @@ Si bien se utiliza el protocolo MQTT, que no tiene una transmisión segura, el s
 \end{figure}
 
 \paragraph{
-El registro de la clave pública del dispositivo en los servicios de Google se realizan a nombre de la BAD API y sólo pueden hacerse de forma autenticada [Figura \ref{fig:keypairgeneration}]. Tanto el registro como el guardado de la clave pública en el dispositivos son realizados por desarrolladores de la BAD API y no se guarda ningún tipo de copia de la clave privada. La generación del par de claves se realiza con las recomendaciones de seguridad de Google.
+El registro de la clave pública del dispositivo en los servicios de Google se realizan a nombre de la BAD API y sólo pueden hacerse de forma autenticada [Figura \ref{fig:keypairgeneration}]. Tanto el registro como el guardado de la clave pública en el dispositivos son realizados por desarrolladores de la BAD API y no se guarda ningún tipo de copia de la clave privada. La generación del par de claves se realiza con las recomendaciones de seguridad de Google \cite{GoogleIotSecurity}.
 }
 
 \begin{figure}[ht]
@@ -826,7 +862,7 @@ Las principales bibliotecas utilizadas fueron:
 
 \section{Metodología de trabajo}
 \paragraph{
-Para el desarrollo se utilizó la metodología ágil SCRUM. Para la implementación de dicha metodología utilizamos una herramienta online llamada Trello, que si bien ofrece un panel de la metodología KanBan, lo adaptamos para que siga los lineamientos de SCRUM. Estas adaptaciones incluyen la creación de las columnas Backlog, Doing y Done, que nos permitieron saber en cada momento del trabajo, qué tareas estaba realizando cada integrante de forma paralela y cuales estaban terminadas como se ve en la figura \ref{fig:trelloboard}.
+Para el desarrollo se utilizó la metodología ágil SCRUM. Para la implementación de dicha metodología utilizamos una herramienta online llamada Trello, que si bien ofrece un panel de la metodología KanBan, lo adaptamos para que siga los lineamientos de SCRUM. Estas adaptaciones incluyen la creación de las columnas Backlog, Doing y Done, que nos permitieron saber en cada momento del trabajo, qué tareas estaba realizando cada integrante de forma paralela y cuales estaban terminadas [Figura \ref{fig:trelloboard}].
 }
 
 \begin{figure}[ht]
@@ -886,18 +922,38 @@ Para esta implementación, el cliente guarda en una base de datos PostgreSQL en 
 
 \section{Conclusiones}
 \paragraph{
-Si bien no nos fue posible encontrar features características de los individuos para generar un sistema de autenticación, se pudo utilizar perfectamente las señales EMG para el desarrollo de un esquema de autenticación de segundo factor.
+Si bien no nos fue posible encontrar features características de los individuos para generar un sistema de autenticación, se pudo utilizar perfectamente las señales EMG para el desarrollo de un esquema de autenticación de segundo factor. Aunque la señal se transforma en un código binario, la utilización de un dispositivo de lectura de bioseñales provee una prueba de vida del usuario, aspecto que carecen los secretos compartidos.
 }
 \paragraph{
 Creemos que la clave para la masificación de este tipo de tecnologías es la implementación de una interfaz genérica por encima de los propios drivers de los dispositivos de lectura de señales, en nuestro caso fue una interfaz HTTP pero podría ser otra. Esto permite poder adaptar todo tipo de aplicaciones a la utilización de dichas interfaces de manera sencilla, evitando los tipos problemas que se tuvieron con el dispositivo de la marca TrueSense y, además, permite mejorar el dispositivo de captura de la señal sin necesidad de alterar las aplicaciones que lo utilizan.
+}
+\paragraph{
+La tecnología está en un grado de madurez y costo suficientemente bajo como para que se comiencen a utilizar las bioseñales como forma de autenticación de forma obligatoria en servicios que manejan información sensible de los usuarios como los bancarios.
+}
+\paragraph{
+Uno de los problemas más importantes que se presentan cuando se utilizan sistemas de autenticación mediante información intrinseca de las personas, como huellas digitales o iris, es que ante el caso de que se filtre esa información (por un ataque, por ejemplo), los usuarios no pueden cambiarla. Por eso, lo mas interesante de las bioseñales es que requieren la participación activa de los usuarios que otorgan una prueba de vida y aunque la información se extravíe, es más complicado impersonificar a otro usuario ya que es posible agregar varias formas de protección a los dispositivos.
+}
+\section{Disclaimer}
+\paragraph{
+Tanto la API como el prototipo no pretenden ser una solución completa y probada sino un punto de partida para eventualmete ofrecer una aplicación comercial. Para evaluar la robustez del sistema es necesario que haya un escrutinio o \textit{penetration testing} realizado por expertos de seguridad. Finalmente para la comercialización es fundamentar conseguir el certificado FIPS de al menos nivel 3 y los certificados para TLS.
 }
 \section{Trabajo futuro}
 \paragraph{
 Como trabajo a futuro se planea agregar nuevos dispositivos que utilicen otras funciones biométricas de EMG como EEG (Muse, OpenBCI) para lo cual necesitan de conexión bluetooth LE. Dentro de las posibles mejoras del desarrollo actual se puede utilizar algún dispositivo de lectura de señales de menor tamaño y/o que pueda obtener señales con mayor velocidad y/o fidelidad. Estos últimos puntos son útiles para aumentar la aceptación psicológica de los usuarios.
 }
 \paragraph{
-Independientemente al esquema desarrollado para este trabajo, una posible investigación que se podría hacer es si es posible identificar y autenticar individuos utilizando la señal EMG obtenida mientras realizan algún movimiento único como la de firmar un documento con una lapicera.
+Una aplicación relacionada sería la utilización de esta tecnología para identificar a la persona en base a las señales de EMG en el momento en que realiza una firma sobre un papel, su firma de puño y letra.  Este esquema obtendría un fingerprint de las señales de EMG similares a lo realizado en este trabajo, con el agregado del componente activo que agregue un eje más de verificación y que permite la actualización de la información complementaria en el caso de que la misma sea comprometida.  Además generaría un beneficio en cuánto a la aceptación de la misma ya que la firma de puño y letra es un mecanismo natural para proveer de una autenticidad a documentos legales y burocráticos. En caso de funcionar, podría transformarse en una forma muy útil de firmar pagos electrónicos.
 }
+
+\paragraph{
+En el trabajo realizado en la universidad de La Plata \cite{haberman2016} se realizó un estudio específico de los biopotenciales de EMG en una aplicación para personas con discapacidades motoras. En el mismo se implementa un prototipo de dispositivo de ayuda tipo switch que emite pulsos binarios generados a partir de señales EMG. Un posible trabajo futuro podría ser realizar una interfaz genérica que permita comunicar este tipo de dispositivos con aplicaciones web o de escritorio de forma tal que sea más fácil la incorporación de nuevos dispositivos.
+}
+
+\paragraph{
+Además de los usos actuales de EMG y EEG, otros usos innovadores de estas señales podrían ser en la industria automotriz (por ejemplo para que los autos solo puedan ser abiertos y encendidos por ciertas personas, para activar el manejo autónomo o incluso para manejar) o el manejo de drones.
+}
+
+
 
 \clearpage
 \nocite{opinnovationswebsite}
