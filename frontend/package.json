@@ -12,7 +12,7 @@
     "prop-types": "^15.6.1",
     "react": "^16.4.0",
     "react-chartkick": "^0.2.0",
-    "react-dom": "^16.4.0",
+    "react-dom": "^16.4.2",
     "react-rangeslider": "^2.2.0",
     "react-scripts": "1.1.4"
   },
